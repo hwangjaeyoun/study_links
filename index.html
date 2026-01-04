@@ -2,53 +2,84 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>다연 영어 동영상 링크 관리자</title>
+    <title>🧸 영어 수업 동영상 링크 관리</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
-        /* 이전 스타일 유지 */
-        body { font-family: 'Pretendard', sans-serif; background-color: #f5f7fa; padding: 40px 20px; display: flex; justify-content: center; }
-        .container { width: 100%; max-width: 1000px; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-        h1 { text-align: center; color: #333; }
-        .input-group { display: grid; grid-template-columns: 1fr 1.5fr 2fr auto; gap: 10px; margin-bottom: 30px; background: #f8f9fa; padding: 20px; border-radius: 8px; }
-        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
-        .done { background-color: #f9f9f9; color: #ccc; }
-        button { padding: 8px 12px; cursor: pointer; border: none; border-radius: 4px; }
-        .add-btn { background: #28a745; color: white; }
-        .edit-btn { background: #ffc107; }
-        .delete-btn { background: #ff4757; color: white; }
-        .save-btn { background: #007bff; color: white; }
-        input { padding: 8px; border: 1px solid #ddd; width: 90%; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #f0f9ff; padding: 40px 20px; display: flex; justify-content: center; color: #444; }
+        .container { width: 100%; max-width: 1100px; background: white; padding: 35px; border-radius: 30px; box-shadow: 0 10px 30px rgba(135, 206, 235, 0.2); border: 3px solid #e0f2fe; }
+        h1 { text-align: center; color: #60a5fa; font-size: 2rem; margin-bottom: 30px; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #f0f9ff; padding: 15px 25px; border-radius: 20px; }
+        .input-group { display: grid; grid-template-columns: 1fr 1fr 1.5fr 2fr auto; gap: 12px; margin-bottom: 30px; }
+        input, select { padding: 12px; border: 2px solid #e0f2fe; border-radius: 15px; outline: none; transition: border 0.3s; }
+        input:focus, select:focus { border-color: #87CEEB; }
+        button { padding: 10px 18px; border: none; border-radius: 15px; cursor: pointer; font-weight: bold; transition: all 0.2s; }
+        .add-btn { background: #87CEEB; color: white; box-shadow: 0 4px 0 #6eb9d9; }
+        .add-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #6eb9d9; }
+        .edit-btn { background: #ffed9e; color: #856404; }
+        .delete-btn { background: #ffcfcf; color: #a94442; }
+        .save-btn { background: #bbf7d0; color: #166534; }
+        button:hover { filter: brightness(1.05); transform: scale(1.02); }
+        table { width: 100%; border-collapse: separate; border-spacing: 0 10px; table-layout: fixed; }
+        th { background: #87CEEB; color: white; padding: 15px; font-size: 1rem; text-align: center; }
+        th:first-child { border-radius: 15px 0 0 15px; }
+        th:last-child { border-radius: 0 15px 15px 0; }
+        td { background: #fff; padding: 15px; text-align: center; border-top: 1px solid #f0f9ff; border-bottom: 1px solid #f0f9ff; word-break: break-all; }
+        td:first-child { border-left: 1px solid #f0f9ff; border-radius: 15px 0 0 15px; }
+        td:last-child { border-right: 1px solid #f0f9ff; border-radius: 0 15px 15px 0; }
+        tr:not(thead tr):hover td { background-color: #f8fdff; transform: scale(1.005); transition: 0.2s; }
+        .user-tag { background: #dcfce7; color: #166534; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; }
+        .done-row td { color: #cbd5e1; background: #fcfdfe !important; }
+        .done-row a { color: #cbd5e1; text-decoration: line-through; }
+        a { color: #3b82f6; text-decoration: none; font-weight: 500; }
+        input[type="checkbox"] { transform: scale(1.5); cursor: pointer; accent-color: #87CEEB; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>다연 영어 동영상 링크 관리</h1>
-    <div class="input-group">
-        <input type="date" id="new-date">
-        <input type="text" id="new-title" placeholder="수업 제목">
-        <input type="text" id="new-url" placeholder="링크">
-        <button class="add-btn" onclick="addLink()">신규 등록</button>
+    <h1>☁️ 영어 수업 동영상 링크 관리</h1>
+
+    <div class="top-bar">
+        <strong>🍿 누구의 수업을 볼까요?</strong>
+        <select id="user-filter" onchange="renderLinks(allDataCache)">
+            <option value="전체">전체 친구들</option>
+            <option value="황다연">황다연</option>
+            <option value="김보석">김보석</option>
+        </select>
     </div>
+
+    <div class="input-group">
+        <select id="new-user">
+            <option value="">이름 선택</option>
+            <option value="황다연">황다연</option>
+            <option value="김보석">김보석</option>
+        </select>
+        <input type="date" id="new-date">
+        <input type="text" id="new-title" placeholder="수업 제목 쏙쏙">
+        <input type="text" id="new-url" placeholder="링크 주소 붙여넣기">
+        <button class="add-btn" onclick="addLink()">기록하기</button>
+    </div>
+
     <table>
         <thead>
             <tr>
-                <th style="width:20px">✔</th>
-                <th style="width:90px">수업일자</th>
-                <th style="width:220px">제목</th>
-                <th>링크</th>
-                <th style="width:100px">완료일시</th>
-                <th style="width:120px">관리</th>
+                <th style="width: 100px;">작성자</th>
+                <th style="width: 125px;">언제일까?</th>
+                <th style="width: 170px;">수업이름</th>
+                <th>주소</th>
+                <th style="width: 60px;">완료</th>
+                <th style="width: 150px;">완료시간</th>
+                <th style="width: 140px;">관리</th>
             </tr>
         </thead>
-        <tbody id="link-table-body"></tbody>
+        <tbody id="link-table-body">
+            <tr><td colspan="7">기다려주세요... 🧸</td></tr>
+        </tbody>
     </table>
 </div>
 
 <script>
-    // ⚠️ 여기에 본인의 Firebase 설정값을 붙여넣으세요
     const firebaseConfig = {
   apiKey: "AIzaSyAHvOrb4B3c1uY7WwaR1yuQrwP5lDbRZiI",
   authDomain: "linkmanage-d8efd.firebaseapp.com",
@@ -60,80 +91,125 @@
   measurementId: "G-6J7VGJ2CXM"
     };
 
-    // Firebase 초기화
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+    let allDataCache = null;
     let editId = null;
 
-    // 데이터 변경 실시간 감시 및 렌더링
-    db.ref('links').on('value', (snapshot) => {
-        const data = snapshot.val();
-        renderLinks(data);
+    // 데이터베이스 실시간 리스너 (데이터 변경 시 자동 renderLinks 호출)
+    db.ref('class_links').on('value', (snapshot) => {
+        allDataCache = snapshot.val();
+        renderLinks(allDataCache); 
     });
 
     function addLink() {
+        const user = document.getElementById('new-user').value;
         const date = document.getElementById('new-date').value;
         const title = document.getElementById('new-title').value;
         const url = document.getElementById('new-url').value;
-        if (!date || !title || !url) return;
 
-        const newRef = db.ref('links').push();
-        newRef.set({
-            id: newRef.key,
-            date, title, url,
-            checked: false,
-            doneTime: '-'
+        if (!user || !date || !title || !url) { alert("빈칸을 모두 채워주세요! ✨"); return; }
+
+        const newRef = db.ref('class_links').push();
+        newRef.set({ id: newRef.key, user, date, title, url, checked: false, doneTime: '-' })
+        .then(() => {
+            document.getElementById('new-title').value = '';
+            document.getElementById('new-url').value = '';
         });
     }
 
     function toggleCheck(id, currentStatus) {
         const now = new Date();
-        const timeStr = !currentStatus ? `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}` : '-';
-        db.ref('links/' + id).update({ checked: !currentStatus, doneTime: timeStr });
+        const timeStr = !currentStatus ? `${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}` : '-';
+        db.ref('class_links/' + id).update({ checked: !currentStatus, doneTime: timeStr });
     }
 
-    function startEdit(id) { editId = id; db.ref('links').once('value', s => renderLinks(s.val())); }
-
-    function saveEdit(id) {
-        const row = document.getElementById(`row-${id}`);
-        db.ref('links/' + id).update({
-            date: row.querySelector('.edit-date').value,
-            title: row.querySelector('.edit-title').value,
-            url: row.querySelector('.edit-url').value
-        });
-        editId = null;
+    function startEdit(id) { 
+        editId = id; 
+        renderLinks(allDataCache); // 수정 모드 UI로 전환
     }
 
-    function deleteLink(id) { if(confirm("삭제할까요?")) db.ref('links/' + id).remove(); }
+    // [핵심 수정] 저장 후 즉시 재조회 로직
+function saveEdit(id) {
+    console.log("저장 프로세스 시작: ", id); // 디버깅용
+    
+    const row = document.getElementById(`row-${id}`);
+    const newDate = row.querySelector('.edit-date').value;
+    const newTitle = row.querySelector('.edit-title').value;
+    const newUrl = row.querySelector('.edit-url').value;
+
+    const updateData = {
+        date: newDate,
+        title: newTitle,
+        url: newUrl
+    };
+
+    // 1. 해당 ID의 경로로 직접 업데이트 요청
+    db.ref('class_links/' + id).update(updateData)
+    .then(() => { 
+        console.log("Firebase 저장 성공!");
+        editId = null; // 수정 모드 해제
+
+        // 2. 강제 재조회: Firebase 서버에서 최신 데이터를 한 번 더 가져와서 화면 갱신
+        return db.ref('class_links').once('value');
+    })
+    .then((snapshot) => {
+        allDataCache = snapshot.val(); // 캐시 업데이트
+        renderLinks(allDataCache);     // 화면 다시 그리기
+        alert("성공적으로 저장되었어요! ✨");
+    })
+    .catch(err => {
+        console.error("저장 중 에러 발생:", err);
+        alert("저장에 실패했어요. 인터넷 연결이나 Firebase 권한을 확인해 주세요.");
+    });
+}
+    function deleteLink(id) { 
+        if(confirm("이 기록을 지울까요? 💨")) { 
+            db.ref('class_links/' + id).remove(); 
+        } 
+    }
 
     function renderLinks(data) {
         const tbody = document.getElementById('link-table-body');
+        const filter = document.getElementById('user-filter').value;
         tbody.innerHTML = '';
-        if(!data) return;
+        
+        if(!data) { 
+            tbody.innerHTML = '<tr><td colspan="7">아직 등록된 수업이 없어요! 🌸</td></tr>'; 
+            return; 
+        }
 
-        Object.values(data).forEach(link => {
+        Object.values(data).sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(link => {
+            if (filter !== "전체" && link.user !== filter) return;
+
             const tr = document.createElement('tr');
             tr.id = `row-${link.id}`;
-            if(link.checked) tr.className = 'done';
+            if(link.checked) tr.className = 'done-row';
 
             if(editId === link.id) {
-                tr.innerHTML = `<td></td>
-                    <td><input type="date" class="edit-date" value="${link.date}"></td>
-                    <td><input type="text" class="edit-title" value="${link.title}"></td>
-                    <td><input type="text" class="edit-url" value="${link.url}"></td>
-                    <td>${link.doneTime}</td>
-                    <td><button class="save-btn" onclick="saveEdit('${link.id}')">저장</button></td>`;
-            } else {
+                // 수정 입력 모드
                 tr.innerHTML = `
-                    <td><input type="checkbox" ${link.checked ? 'checked' : ''} onchange="toggleCheck('${link.id}', ${link.checked})"></td>
+                    <td><span class="user-tag">${link.user}</span></td>
+                    <td><input type="date" class="edit-date" value="${link.date}" style="width:110px"></td>
+                    <td><input type="text" class="edit-title" value="${link.title}" style="width:130px"></td>
+                    <td><input type="text" class="edit-url" value="${link.url}" style="width:90%"></td>
+                    <td>-</td><td>${link.doneTime}</td>
+                    <td><button class="save-btn" onclick="saveEdit('${link.id}')">꾹 저장</button></td>
+                `;
+            } else {
+                // 일반 보기 모드
+                tr.innerHTML = `
+                    <td><span class="user-tag">${link.user}</span></td>
                     <td>${link.date}</td>
-                    <td>${link.title}</td>
-                    <td><a href="${link.url}" target="_blank">${link.url}</a></td>
-                    <td>${link.doneTime}</td>
+                    <td><strong>${link.title}</strong></td>
+                    <td><a href="${link.url}" target="_blank">보러가기 ✈️</a></td>
+                    <td><input type="checkbox" ${link.checked ? 'checked' : ''} onchange="toggleCheck('${link.id}', ${link.checked})"></td>
+                    <td style="font-size:0.8rem;">${link.doneTime}</td>
                     <td>
                         <button class="edit-btn" onclick="startEdit('${link.id}')">수정</button>
                         <button class="delete-btn" onclick="deleteLink('${link.id}')">삭제</button>
-                    </td>`;
+                    </td>
+                `;
             }
             tbody.appendChild(tr);
         });
