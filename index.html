@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>다연 영어 동영상 링크 관리자</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <style>
+        /* 이전 스타일 유지 */
+        body { font-family: 'Pretendard', sans-serif; background-color: #f5f7fa; padding: 40px 20px; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 1000px; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        h1 { text-align: center; color: #333; }
+        .input-group { display: grid; grid-template-columns: 1fr 1.5fr 2fr auto; gap: 10px; margin-bottom: 30px; background: #f8f9fa; padding: 20px; border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
+        .done { background-color: #f9f9f9; color: #ccc; }
+        button { padding: 8px 12px; cursor: pointer; border: none; border-radius: 4px; }
+        .add-btn { background: #28a745; color: white; }
+        .edit-btn { background: #ffc107; }
+        .delete-btn { background: #ff4757; color: white; }
+        .save-btn { background: #007bff; color: white; }
+        input { padding: 8px; border: 1px solid #ddd; width: 90%; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>다연 영어 동영상 링크 관리</h1>
+    <div class="input-group">
+        <input type="date" id="new-date">
+        <input type="text" id="new-title" placeholder="수업 제목">
+        <input type="text" id="new-url" placeholder="링크">
+        <button class="add-btn" onclick="addLink()">신규 등록</button>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th style="width:20px">✔</th>
+                <th style="width:90px">수업일자</th>
+                <th style="width:220px">제목</th>
+                <th>링크</th>
+                <th style="width:100px">완료일시</th>
+                <th style="width:120px">관리</th>
+            </tr>
+        </thead>
+        <tbody id="link-table-body"></tbody>
+    </table>
+</div>
+
+<script>
+    // ⚠️ 여기에 본인의 Firebase 설정값을 붙여넣으세요
+    const firebaseConfig = {
+  apiKey: "AIzaSyAHvOrb4B3c1uY7WwaR1yuQrwP5lDbRZiI",
+  authDomain: "linkmanage-d8efd.firebaseapp.com",
+  databaseURL: "https://linkmanage-d8efd-default-rtdb.firebaseio.com",
+  projectId: "linkmanage-d8efd",
+  storageBucket: "linkmanage-d8efd.firebasestorage.app",
+  messagingSenderId: "517672204798",
+  appId: "1:517672204798:web:ec8315e84a5120648868af",
+  measurementId: "G-6J7VGJ2CXM"
+    };
+
+    // Firebase 초기화
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    let editId = null;
+
+    // 데이터 변경 실시간 감시 및 렌더링
+    db.ref('links').on('value', (snapshot) => {
+        const data = snapshot.val();
+        renderLinks(data);
+    });
+
+    function addLink() {
+        const date = document.getElementById('new-date').value;
+        const title = document.getElementById('new-title').value;
+        const url = document.getElementById('new-url').value;
+        if (!date || !title || !url) return;
+
+        const newRef = db.ref('links').push();
+        newRef.set({
+            id: newRef.key,
+            date, title, url,
+            checked: false,
+            doneTime: '-'
+        });
+    }
+
+    function toggleCheck(id, currentStatus) {
+        const now = new Date();
+        const timeStr = !currentStatus ? `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}` : '-';
+        db.ref('links/' + id).update({ checked: !currentStatus, doneTime: timeStr });
+    }
+
+    function startEdit(id) { editId = id; db.ref('links').once('value', s => renderLinks(s.val())); }
+
+    function saveEdit(id) {
+        const row = document.getElementById(`row-${id}`);
+        db.ref('links/' + id).update({
+            date: row.querySelector('.edit-date').value,
+            title: row.querySelector('.edit-title').value,
+            url: row.querySelector('.edit-url').value
+        });
+        editId = null;
+    }
+
+    function deleteLink(id) { if(confirm("삭제할까요?")) db.ref('links/' + id).remove(); }
+
+    function renderLinks(data) {
+        const tbody = document.getElementById('link-table-body');
+        tbody.innerHTML = '';
+        if(!data) return;
+
+        Object.values(data).forEach(link => {
+            const tr = document.createElement('tr');
+            tr.id = `row-${link.id}`;
+            if(link.checked) tr.className = 'done';
+
+            if(editId === link.id) {
+                tr.innerHTML = `<td></td>
+                    <td><input type="date" class="edit-date" value="${link.date}"></td>
+                    <td><input type="text" class="edit-title" value="${link.title}"></td>
+                    <td><input type="text" class="edit-url" value="${link.url}"></td>
+                    <td>${link.doneTime}</td>
+                    <td><button class="save-btn" onclick="saveEdit('${link.id}')">저장</button></td>`;
+            } else {
+                tr.innerHTML = `
+                    <td><input type="checkbox" ${link.checked ? 'checked' : ''} onchange="toggleCheck('${link.id}', ${link.checked})"></td>
+                    <td>${link.date}</td>
+                    <td>${link.title}</td>
+                    <td><a href="${link.url}" target="_blank">${link.url}</a></td>
+                    <td>${link.doneTime}</td>
+                    <td>
+                        <button class="edit-btn" onclick="startEdit('${link.id}')">수정</button>
+                        <button class="delete-btn" onclick="deleteLink('${link.id}')">삭제</button>
+                    </td>`;
+            }
+            tbody.appendChild(tr);
+        });
+    }
+</script>
+</body>
+</html>
