@@ -8,35 +8,35 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
         :root { --primary: #60a5fa; --bg: #f0f9ff; --text: #444; }
-        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg); margin: 0; padding: 20px; color: var(--text); }
+        body { font-family: 'Pretendard', -apple-system, sans-serif; background-color: var(--bg); margin: 0; padding: 20px; color: var(--text); }
         .container { width: 100%; max-width: 1200px; margin: 0 auto; }
         h1 { text-align: center; color: var(--primary); margin-bottom: 25px; }
 
-        /* 입력 및 필터 패널 */
+        /* [입력 및 필터 패널] */
         .panel { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 25px; }
         .input-group { display: flex; gap: 10px; flex-wrap: wrap; }
         select, input { padding: 12px; border: 2px solid #e0f2fe; border-radius: 12px; font-size: 16px; outline: none; flex: 1; min-width: 120px; }
         .add-btn { padding: 12px 25px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
 
-        /* --- [PC 버전 스타일] --- */
+        /* --- [PC 버전 테이블 스타일] --- */
         .pc-view { display: block; width: 100%; overflow-x: auto; }
         table { width: 100%; border-collapse: separate; border-spacing: 0 10px; table-layout: fixed; }
-        th { background: var(--primary); color: white; padding: 15px; font-size: 0.95rem; }
+        th { background: var(--primary); color: white; padding: 15px; font-size: 0.9rem; }
         td { background: white; padding: 12px; text-align: center; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); word-break: break-all; }
         
-        /* PC 테이블 컬럼 너비 조정 */
+        /* PC 컬럼 너비 조정 */
         .col-user { width: 80px; }
         .col-date { width: 110px; }
         .col-title { width: auto; }
         .col-link { width: 100px; }
-        .col-check { width: 50px; } /* 완료 체크박스 사이즈 최소화 */
-        .col-time { width: 120px; }
+        .col-check { width: 50px; } /* 완료 체크박스 슬림화 */
+        .col-time { width: 110px; }
         .col-admin { width: 130px; }
 
         .pc-video-btn { background: #2563eb; color: white; padding: 8px 12px; border-radius: 8px; text-decoration: none; font-size: 0.85rem; display: inline-block; }
         .edit-input-pc { width: 90%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; }
 
-        /* --- [모바일 버전 스타일] --- */
+        /* --- [모바일 버전 카드 스타일] --- */
         .mobile-view { display: none; }
         .link-card { background: white; padding: 18px; border-radius: 20px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); display: flex; flex-direction: column; gap: 10px; }
         .card-header { display: flex; justify-content: space-between; align-items: center; }
@@ -44,17 +44,23 @@
         .admin-btns { display: flex; gap: 8px; }
         .btn-mini { padding: 5px 10px; font-size: 0.75rem; border-radius: 6px; border: none; background: #f1f5f9; color: #64748b; cursor: pointer; }
         .btn-save { background: #bbf7d0; color: #166534; font-weight: bold; }
-        .video-btn-container { display: flex; align-items: center; gap: 12px; margin-top: 5px; }
-        .mobile-video-btn { flex: 1; text-align: center; background: #2563eb; color: white; padding: 15px; border-radius: 15px; text-decoration: none; font-weight: bold; font-size: 1.1rem; }
+
+        /* 모바일 영상 버튼 & 체크박스 가로 배치 */
+        .video-btn-container { display: flex; align-items: stretch; gap: 10px; margin-top: 5px; }
+        .mobile-video-btn { flex: 2; text-align: center; background: #2563eb; color: white; padding: 12px; border-radius: 12px; text-decoration: none; font-weight: bold; font-size: 1rem; }
+        .check-with-label { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: #f8fafc; padding: 8px; border-radius: 12px; border: 1px solid #e2e8f0; }
+        .check-label-text { font-size: 0.75rem; font-weight: bold; color: #64748b; }
+        .mobile-checkbox { width: 24px; height: 24px; accent-color: #2563eb; margin: 0; }
 
         /* 공통 효과 */
         .done { opacity: 0.6; }
         .done td { color: #94a3b8; }
         .done .title-text { text-decoration: line-through; }
-        input[type="checkbox"] { width: 25px; height: 25px; accent-color: #2563eb; cursor: pointer; }
+        input[type="checkbox"] { cursor: pointer; }
 
-        /* --- [반응형 핵심: 미디어 쿼리] --- */
+        /* --- [반응형 미디어 쿼리] --- */
         @media screen and (max-width: 768px) {
+            body { padding: 15px; }
             .pc-view { display: none; }
             .mobile-view { display: block; }
             .input-group { flex-direction: column; }
@@ -65,12 +71,12 @@
 <body>
 
 <div class="container">
-    <h1>☁️ 수업 통합 관리자</h1>
+    <h1>☁️ 수업 통합 관리 시스템</h1>
 
     <div class="panel">
         <div class="input-group">
             <select id="user-filter" onchange="renderLinks(allDataCache)" style="background: #f8fafc; border-color: #cbd5e1; flex: 0.5;">
-                <option value="전체">전체 보기</option>
+                <option value="전체">전체 필터</option>
                 <option value="황다연">황다연</option>
                 <option value="김보석">김보석</option>
             </select>
@@ -78,7 +84,7 @@
             <input type="date" id="new-date">
             <input type="text" id="new-title" placeholder="수업 제목">
             <input type="text" id="new-url" placeholder="URL 주소">
-            <button class="add-btn" onclick="addLink()">기록하기</button>
+            <button class="add-btn" onclick="addLink()">리스트에 추가</button>
         </div>
     </div>
 
@@ -86,12 +92,8 @@
         <table>
             <thead>
                 <tr>
-                    <th class="col-user">이름</th>
-                    <th class="col-date">날짜</th>
-                    <th class="col-title">수업제목</th>
-                    <th class="col-link">링크</th>
-                    <th class="col-check">완료</th>
-                    <th class="col-time">완료시간</th>
+                    <th class="col-user">이름</th><th class="col-date">날짜</th><th class="col-title">수업제목</th>
+                    <th class="col-link">링크</th><th class="col-check">완료</th><th class="col-time">기록</th>
                     <th class="col-admin">관리</th>
                 </tr>
             </thead>
@@ -103,7 +105,7 @@
 </div>
 
 <script>
-    // Firebase 설정 (기존 정보 동일)
+    // Firebase 구성 (기존 설정값 유지)
     const firebaseConfig = {
         apiKey: "AIzaSyAHvOrb4B3c1uY7WwaR1yuQrwP5lDbRZiI",
         authDomain: "linkmanage-d8efd.firebaseapp.com",
@@ -120,6 +122,7 @@
     let allDataCache = null;
     let editId = null;
 
+    // 데이터 실시간 감시
     db.ref('class_links').on('value', (snapshot) => {
         allDataCache = snapshot.val();
         renderLinks(allDataCache); 
@@ -130,7 +133,7 @@
         const date = document.getElementById('new-date').value;
         const title = document.getElementById('new-title').value;
         const url = document.getElementById('new-url').value;
-        if (!user || !date || !title || !url) { alert("빈칸을 채워주세요!"); return; }
+        if (!user || !date || !title || !url) { alert("모든 항목을 입력해주세요!"); return; }
 
         const newRef = db.ref('class_links').push();
         newRef.set({ id: newRef.key, user, date, title, url, checked: false, doneTime: '-' })
@@ -148,34 +151,30 @@
 
     function startEdit(id) { editId = id; renderLinks(allDataCache); }
 
-function saveEdit(id, type) {
+    // 수정 후 재조회 기능 강화
+    function saveEdit(id, type) {
         const container = (type === 'pc') ? document.querySelector(`#pc-row-${id}`) : document.querySelector(`#mob-card-${id}`);
-        
         const updateData = {
             date: container.querySelector('.edit-date').value,
             title: container.querySelector('.edit-title').value,
             url: container.querySelector('.edit-url').value
         };
 
-        // 1. Firebase 데이터 업데이트
         db.ref('class_links/' + id).update(updateData)
         .then(() => {
-            editId = null; // 수정 모드 해제
-            
-            // 2. 명시적으로 전체 데이터를 한 번 더 가져와서 캐시 갱신 (재조회 강제화)
+            editId = null;
+            // 즉시 재조회 및 강제 렌더링
             return db.ref('class_links').once('value');
         })
         .then((snapshot) => {
-            allDataCache = snapshot.val(); // 최신 데이터로 캐시 교체
-            renderLinks(allDataCache);     // 화면 다시 그리기
-            console.log("데이터 수정 및 재조회 완료 ✨");
+            allDataCache = snapshot.val();
+            renderLinks(allDataCache);
         })
-        .catch((error) => {
-            alert("저장 중 오류가 발생했습니다: " + error.message);
-        });
+        .catch(err => alert("저장 실패: " + err.message));
     }
+
     function deleteLink(id) {
-        if(confirm("정말 삭제할까요?")) { db.ref('class_links/' + id).remove(); }
+        if(confirm("이 기록을 삭제하시겠습니까?")) { db.ref('class_links/' + id).remove(); }
     }
 
     function renderLinks(data) {
@@ -188,7 +187,7 @@ function saveEdit(id, type) {
         Object.values(data).sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(link => {
             if (filter !== "전체" && link.user !== filter) return;
 
-            // --- PC 렌더링 ---
+            // --- PC 버전 테이블 행 생성 ---
             const tr = document.createElement('tr');
             tr.id = `pc-row-${link.id}`;
             if(link.checked) tr.className = 'done';
@@ -204,12 +203,12 @@ function saveEdit(id, type) {
                 `;
             } else {
                 tr.innerHTML = `
-                    <td><span class="user-tag">${link.user}</span></td>
+                    <td><span class="user-tag" style="background:#e0f2fe; color:#0369a1;">${link.user}</span></td>
                     <td>${link.date}</td>
                     <td class="title-text"><strong>${link.title}</strong></td>
                     <td><a href="${link.url}" target="_blank" class="pc-video-btn">영상보기</a></td>
                     <td><input type="checkbox" ${link.checked ? 'checked' : ''} onchange="toggleCheck('${link.id}', ${link.checked})"></td>
-                    <td style="font-size:0.8rem; color:#888;">${link.doneTime}</td>
+                    <td style="font-size:0.75rem; color:#888;">${link.doneTime}</td>
                     <td>
                         <button class="btn-mini" onclick="startEdit('${link.id}')">수정</button>
                         <button class="btn-mini" onclick="deleteLink('${link.id}')">삭제</button>
@@ -218,17 +217,17 @@ function saveEdit(id, type) {
             }
             pcTbody.appendChild(tr);
 
-            // --- 모바일 렌더링 ---
+            // --- 모바일 버전 카드 생성 ---
             const div = document.createElement('div');
             div.id = `mob-card-${link.id}`;
             div.className = `link-card ${link.checked ? 'done' : ''}`;
             
             if(editId === link.id) {
                 div.innerHTML = `
-                    <input type="text" class="edit-title" value="${link.title}" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd;">
-                    <input type="date" class="edit-date" value="${link.date}" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd;">
-                    <input type="text" class="edit-url" value="${link.url}" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd;">
-                    <button class="add-btn" onclick="saveEdit('${link.id}', 'mob')">수정 완료</button>
+                    <input type="text" class="edit-title" value="${link.title}" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd; box-sizing:border-box;">
+                    <input type="date" class="edit-date" value="${link.date}" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd; margin-top:5px; box-sizing:border-box;">
+                    <input type="text" class="edit-url" value="${link.url}" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd; margin-top:5px; box-sizing:border-box;">
+                    <button class="add-btn" style="margin-top:10px;" onclick="saveEdit('${link.id}', 'mob')">수정 완료</button>
                 `;
             } else {
                 div.innerHTML = `
@@ -242,8 +241,11 @@ function saveEdit(id, type) {
                     <div class="title-text" style="font-weight:bold; font-size:1.1rem;">${link.title}</div>
                     <div style="font-size:0.85rem; color:#888;">📅 ${link.date} ${link.checked ? ` | ✅ ${link.doneTime}` : ''}</div>
                     <div class="video-btn-container">
-                        <input type="checkbox" ${link.checked ? 'checked' : ''} onchange="toggleCheck('${link.id}', ${link.checked})">
-                        <a href="${link.url}" target="_blank" class="mobile-video-btn">▶ 영상 바로보기</a>
+                        <a href="${link.url}" target="_blank" class="mobile-video-btn">▶ 영상보기</a>
+                        <div class="check-with-label">
+                            <span class="check-label-text">완료</span>
+                            <input type="checkbox" class="mobile-checkbox" ${link.checked ? 'checked' : ''} onchange="toggleCheck('${link.id}', ${link.checked})">
+                        </div>
                     </div>
                 `;
             }
