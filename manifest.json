@@ -1,0 +1,15 @@
+{
+  "name": "수업 관리 시스템",
+  "short_name": "수업관리",
+  "start_url": "/study_links/",
+  "display": "standalone",
+  "background_color": "#fefce8",
+  "theme_color": "#f59e0b",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/5832/5832416.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
