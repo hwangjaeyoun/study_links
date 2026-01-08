@@ -16,19 +16,13 @@
 
         body { 
             font-family: 'Pretendard', -apple-system, sans-serif; 
-            background-color: var(--bg); 
-            margin: 0; 
-            padding: 15px; 
-            color: var(--text); 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            background-color: var(--bg); margin: 0; padding: 15px; color: var(--text); 
+            display: flex; flex-direction: column; align-items: center;
         }
 
         .container { width: 100%; max-width: 500px; }
         h1 { text-align: center; color: var(--primary); font-size: 1.5rem; margin: 10px 0 20px; }
 
-        /* 입력 및 필터 영역 */
         .panel { 
             background: white; padding: 20px; border-radius: 20px; 
             box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px;
@@ -37,62 +31,59 @@
 
         select, input { 
             padding: 12px; border: 2px solid #e0f2fe; border-radius: 12px; 
-            font-size: 16px; outline: none; transition: 0.3s;
+            font-size: 16px; outline: none;
         }
-
-        input:focus { border-color: var(--primary); }
 
         .add-btn { 
             padding: 14px; background: var(--primary); color: white; border: none; 
             border-radius: 12px; font-weight: bold; font-size: 1rem; cursor: pointer;
         }
 
-        /* 카드형 리스트 레이아웃 */
+        /* 카드 레이아웃 수정 */
         .link-card {
             background: white; padding: 18px; border-radius: 20px; margin-bottom: 15px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.03); position: relative;
-            display: grid;
-            grid-template-areas: 
-                "user title title"
-                "check info info"
-                "link link actions";
-            grid-template-columns: 70px 1fr auto;
-            gap: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            display: flex; flex-direction: column; gap: 10px;
             border: 2px solid transparent;
         }
 
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
         .user-tag { 
-            grid-area: user; background: #dcfce7; color: #166534; 
-            padding: 4px 8px; border-radius: 8px; font-size: 0.8rem; text-align: center; font-weight: bold;
+            background: #dcfce7; color: #166534; padding: 4px 10px; 
+            border-radius: 8px; font-size: 0.8rem; font-weight: bold;
         }
+        
+        /* 수정/삭제 버튼: 작고 깔끔하게 우측 상단 배치 */
+        .admin-btns { display: flex; gap: 5px; }
+        .btn-mini { 
+            padding: 4px 8px; font-size: 0.75rem; border-radius: 6px; 
+            border: none; background: #f1f5f9; color: #94a3b8; cursor: pointer;
+        }
+        .btn-mini:hover { background: #e2e8f0; }
 
-        .title { grid-area: title; font-weight: bold; font-size: 1.1rem; align-self: center; }
-        .info { grid-area: info; font-size: 0.85rem; color: #888; }
-        .link-area { grid-area: link; margin-top: 10px; }
-        .check-area { grid-area: check; display: flex; align-items: center; justify-content: center; }
-        .actions { grid-area: actions; display: flex; gap: 8px; margin-top: 10px; }
+        .title { font-weight: bold; font-size: 1.15rem; line-height: 1.4; margin-top: 5px; }
+        .info { font-size: 0.85rem; color: #888; display: flex; align-items: center; gap: 10px; }
 
+        /* 영상보기 버튼: 강조 및 확대 */
+        .video-btn-container { margin-top: 5px; display: flex; align-items: center; gap: 12px; }
         .link-url-btn {
-            display: inline-block; background: #eff6ff; color: var(--primary);
-            padding: 8px 15px; border-radius: 10px; text-decoration: none; font-weight: bold; font-size: 0.9rem;
+            flex: 1; /* 가로 꽉 채우기 */
+            text-align: center; background: #2563eb; color: white;
+            padding: 15px; border-radius: 15px; text-decoration: none; 
+            font-weight: bold; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
         }
+        .link-url-btn:active { transform: scale(0.98); }
 
-        .btn-small { padding: 6px 10px; border-radius: 8px; font-size: 0.8rem; border: none; cursor: pointer; }
-        .edit-btn { background: #fef3c7; color: #92400e; }
-        .delete-btn { background: #fee2e2; color: #991b1b; }
+        /* 체크박스 크기 */
+        input[type="checkbox"] { width: 28px; height: 28px; accent-color: #2563eb; cursor: pointer; }
 
-        /* 체크박스 크기 키움 */
-        input[type="checkbox"] { width: 26px; height: 26px; accent-color: var(--primary); }
-
-        /* 완료 상태 */
-        .done-card { background: #f8fafc; opacity: 0.7; border-color: #e2e8f0; }
+        .done-card { background: #f8fafc; opacity: 0.7; }
         .done-card .title { text-decoration: line-through; color: #94a3b8; }
+        .done-card .link-url-btn { background: #94a3b8; box-shadow: none; }
 
-        /* 수정 모드 카드 */
+        /* 수정 모드 */
         .edit-card { border: 2px dashed var(--primary); }
-        .edit-card input { padding: 8px; font-size: 14px; width: 100%; box-sizing: border-box; }
-        .save-btn { grid-area: actions; background: #bbf7d0; color: #166534; font-weight: bold; border-radius: 8px; border: none; padding: 10px; }
-
+        .edit-input { width: 100%; padding: 10px; margin-bottom: 5px; border-radius: 8px; border: 1px solid #ddd; }
     </style>
 </head>
 <body>
@@ -106,7 +97,6 @@
             <option value="황다연">황다연</option>
             <option value="김보석">김보석</option>
         </select>
-        <hr style="width:100%; border:0; border-top:1px solid #eee; margin:5px 0;">
         <div style="display:flex; gap:10px;">
             <select id="new-user" style="flex:1;">
                 <option value="">이름</option>
@@ -115,9 +105,9 @@
             </select>
             <input type="date" id="new-date" style="flex:2;">
         </div>
-        <input type="text" id="new-title" placeholder="수업 제목을 입력하세요">
-        <input type="text" id="new-url" placeholder="URL 주소를 붙여넣으세요">
-        <button class="add-btn" onclick="addLink()">기록하기</button>
+        <input type="text" id="new-title" placeholder="수업 제목 입력">
+        <input type="text" id="new-url" placeholder="URL 주소 붙여넣기">
+        <button class="add-btn" onclick="addLink()">리스트에 기록하기</button>
     </div>
 
     <div id="card-container">
@@ -126,7 +116,7 @@
 </div>
 
 <script>
-    // Firebase 설정 (기존 설정 유지)
+    // Firebase 설정 (기존 정보 동일)
     const firebaseConfig = {
         apiKey: "AIzaSyAHvOrb4B3c1uY7WwaR1yuQrwP5lDbRZiI",
         authDomain: "linkmanage-d8efd.firebaseapp.com",
@@ -179,15 +169,13 @@
             title: card.querySelector('.edit-title').value,
             url: card.querySelector('.edit-url').value
         };
-
         db.ref('class_links/' + id).update(updateData).then(() => {
             editId = null;
-            alert("저장 완료! ✨");
         });
     }
 
     function deleteLink(id) {
-        if(confirm("이 기록을 지울까요? 💨")) { db.ref('class_links/' + id).remove(); }
+        if(confirm("정말 삭제할까요?")) { db.ref('class_links/' + id).remove(); }
     }
 
     function renderLinks(data) {
@@ -196,7 +184,7 @@
         container.innerHTML = '';
         
         if(!data) {
-            container.innerHTML = '<p style="text-align:center;">아직 등록된 수업이 없어요! 🌸</p>';
+            container.innerHTML = '<p style="text-align:center;">등록된 수업이 없어요! 🌸</p>';
             return;
         }
 
@@ -205,32 +193,31 @@
 
             const div = document.createElement('div');
             div.id = `card-${link.id}`;
-            div.className = `link-card ${link.checked ? 'done-card' : ''} ${editId === link.id ? 'edit-card' : ''}`;
+            div.className = `link-card ${link.checked ? 'done-card' : ''}`;
 
             if(editId === link.id) {
-                // 수정 모드 레이아웃
                 div.innerHTML = `
-                    <span class="user-tag">${link.user}</span>
-                    <div class="title" style="grid-area:title"><input type="text" class="edit-title" value="${link.title}"></div>
-                    <div class="info" style="grid-area:info"><input type="date" class="edit-date" value="${link.date}"></div>
-                    <div class="link-area"><input type="text" class="edit-url" value="${link.url}"></div>
-                    <div class="actions"><button class="save-btn" onclick="saveEdit('${link.id}')">완료</button></div>
+                    <input type="text" class="edit-input edit-title" value="${link.title}">
+                    <input type="date" class="edit-input edit-date" value="${link.date}">
+                    <input type="text" class="edit-input edit-url" value="${link.url}">
+                    <button class="add-btn" onclick="saveEdit('${link.id}')">수정 완료</button>
                 `;
             } else {
-                // 일반 카드 모드 레이아웃
                 div.innerHTML = `
-                    <span class="user-tag">${link.user}</span>
+                    <div class="card-header">
+                        <span class="user-tag">${link.user}</span>
+                        <div class="admin-btns">
+                            <button class="btn-mini" onclick="startEdit('${link.id}')">수정</button>
+                            <button class="btn-mini" onclick="deleteLink('${link.id}')">삭제</button>
+                        </div>
+                    </div>
                     <div class="title">${link.title}</div>
-                    <div class="check-area">
+                    <div class="info">
+                        📅 ${link.date} ${link.checked ? ` | ✅ ${link.doneTime}` : ''}
+                    </div>
+                    <div class="video-btn-container">
                         <input type="checkbox" ${link.checked ? 'checked' : ''} onchange="toggleCheck('${link.id}', ${link.checked})">
-                    </div>
-                    <div class="info">📅 ${link.date} ${link.checked ? ` | ✅ ${link.doneTime}` : ''}</div>
-                    <div class="link-area">
-                        <a href="${link.url}" target="_blank" class="link-url-btn">📺 영상 보기</a>
-                    </div>
-                    <div class="actions">
-                        <button class="btn-small edit-btn" onclick="startEdit('${link.id}')">수정</button>
-                        <button class="btn-small delete-btn" onclick="deleteLink('${link.id}')">삭제</button>
+                        <a href="${link.url}" target="_blank" class="link-url-btn">▶ 영상 바로보기</a>
                     </div>
                 `;
             }
