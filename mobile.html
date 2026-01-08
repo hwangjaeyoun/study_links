@@ -1,26 +1,32 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>📱 수업 관리</title>
+
+    <link rel="manifest" href="./manifest.json">
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+            .then(() => console.log("서비스 워커 등록 성공"))
+            .catch(() => console.log("서비스 워커 등록 실패"));
+        }
+    </script>
 
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://hwangjaeyoun.github.io/study_links/">
     <meta property="og:title" content="📒 수업 관리 시스템">
     <meta property="og:description" content="오늘의 수업 영상과 진도를 확인하세요!">
     <meta property="og:image" content="https://cdn-icons-png.flaticon.com/512/5832/5832416.png">
-
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/5832/5832416.png">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/5832/5832416.png">
-    
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>📱 수업 관리 </title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
     <style>
         :root { 
             --primary: #f59e0b; 
@@ -34,13 +40,35 @@
             font-family: -apple-system, sans-serif; 
             background: var(--bg); 
             margin: 0; 
-            padding: 15px; 
+            padding: 0; /* 앱 설치 바 때문에 패딩 조정 */
             color: var(--text-main);
             -webkit-tap-highlight-color: transparent;
         }
+
+        /* 📱 앱 설치 유도 바 디자인 */
+        #install-area { 
+            display: none; 
+            background: #fffbeb; 
+            padding: 15px; 
+            border-bottom: 2px solid #fde68a; 
+            text-align: center; 
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        #install-button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            margin-top: 8px;
+            cursor: pointer;
+        }
         
         /* 헤더 영역 */
-        .header { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+        .header { padding: 15px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
         .reg-btn-mob { 
             background: var(--primary); 
             color: white; 
@@ -63,6 +91,7 @@
         }
 
         /* 카드 리스트 디자인 */
+        #mobile-card-container { padding: 0 15px 30px; }
         .link-card { 
             background: white; 
             padding: 18px; 
@@ -107,39 +136,29 @@
         }
         input[type="checkbox"] { width: 24px; height: 24px; accent-color: #2563eb; }
 
-        /* ✨ 완료 상태 디자인: 취소선 없음, 기울임체, 연한 색상 */
+        /* ✨ 완료 상태 디자인 */
         .done { background: #fafafa !important; border: 1px solid #eee; }
-        .done .title-text { 
-            text-decoration: none !important; 
-            font-style: italic; 
-            color: var(--text-muted); 
-        }
+        .done .title-text { font-style: italic; color: var(--text-muted); }
         .done .info-text { font-style: italic; color: #cbd5e1; }
 
         /* 수정 모드 입력창 */
         .edit-input { 
-            width: 100%; 
-            padding: 12px; 
-            border: 2px solid #fde68a; 
-            border-radius: 12px; 
-            font-size: 15px; 
-            box-sizing: border-box; 
-            margin-bottom: 8px; 
-            outline: none;
+            width: 100%; padding: 12px; border: 2px solid #fde68a; 
+            border-radius: 12px; font-size: 15px; box-sizing: border-box; 
+            margin-bottom: 8px; outline: none;
         }
         .save-btn { 
-            background: #10b981; 
-            color: white; 
-            border: none; 
-            padding: 14px; 
-            border-radius: 12px; 
-            font-weight: bold; 
-            width: 100%; 
-            font-size: 1rem;
+            background: #10b981; color: white; border: none; padding: 14px; 
+            border-radius: 12px; font-weight: bold; width: 100%; font-size: 1rem;
         }
     </style>
 </head>
 <body>
+
+<div id="install-area">
+    <div style="font-size: 0.9rem; font-weight: bold; color: #854d0e;">앱으로 설치해서 간편하게 사용하세요!</div>
+    <button id="install-button">📱 앱 설치하기</button>
+</div>
 
 <div class="header">
     <a href="admin.html" class="reg-btn-mob">+ 새 수업 등록하기</a>
@@ -155,7 +174,27 @@
 </div>
 
 <script>
-    // Firebase 설정 (본인의 설정값으로 유지하세요)
+    // 1. 앱 설치(PWA) 로직
+    let deferredPrompt;
+    const installArea = document.getElementById('install-area');
+    const installButton = document.getElementById('install-button');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installArea.style.display = 'block';
+    });
+
+    installButton.addEventListener('click', async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') installArea.style.display = 'none';
+            deferredPrompt = null;
+        }
+    });
+
+    // 2. Firebase 설정
     const firebaseConfig = {
         apiKey: "AIzaSyAHvOrb4B3c1uY7WwaR1yuQrwP5lDbRZiI",
         authDomain: "linkmanage-d8efd.firebaseapp.com",
@@ -172,7 +211,7 @@
     let allDataCache = null;
     let editId = null;
 
-    // 데이터 실시간 감시
+    // 데이터 감시
     db.ref('class_links').on('value', (snap) => {
         allDataCache = snap.val();
         renderLinks(allDataCache);
@@ -182,36 +221,28 @@
         const container = document.getElementById('mobile-card-container');
         const filter = document.getElementById('user-filter').value;
         container.innerHTML = '';
-        
-        if(!data) {
-            container.innerHTML = '<div style="text-align:center; padding:50px; color:#94a3b8;">등록된 수업이 없습니다.</div>';
-            return;
-        }
+        if(!data) return;
 
-        // 데이터를 배열로 변환 후 최신순 정렬
         const items = Object.keys(data).map(key => ({ ...data[key], id: key }));
         items.sort((a, b) => new Date(b.date) - new Date(a.date));
 
         items.forEach(link => {
             if (filter !== "전체" && link.user !== filter) return;
-            
             const div = document.createElement('div');
             div.id = `mob-card-${link.id}`;
             div.className = `link-card ${link.checked ? 'done' : ''}`;
 
             if(editId === link.id) {
-                // 수정 모드 레이아웃
                 div.innerHTML = `
                     <div style="font-weight:bold; margin-bottom:10px; color:var(--primary);">수업 정보 수정</div>
-                    <input type="text" class="edit-input edit-title" value="${link.title}" placeholder="수업 제목">
+                    <input type="text" class="edit-input edit-title" value="${link.title}">
                     <input type="date" class="edit-input edit-date" value="${link.date}">
-                    <input type="text" class="edit-input edit-url" value="${link.url}" placeholder="영상 URL">
+                    <input type="text" class="edit-input edit-url" value="${link.url}">
                     <div style="display:flex; gap:10px; margin-top:5px;">
                         <button onclick="saveEdit('${link.id}')" class="save-btn">저장하기</button>
-                        <button onclick="cancelEdit()" class="btn-mini" style="padding:14px; flex:0.4; background:#e2e8f0;">취소</button>
+                        <button onclick="cancelEdit()" class="btn-mini" style="padding:14px; flex:0.4;">취소</button>
                     </div>`;
             } else {
-                // 일반 보기 레이아웃
                 div.innerHTML = `
                     <div class="card-header">
                         <span class="user-tag">${link.user}</span>
@@ -233,25 +264,17 @@
         });
     }
 
-    // ✨ 저장 후 즉시 재조회 로직 보강
-    function saveEdit(id) {
+    async function saveEdit(id) {
         const card = document.getElementById(`mob-card-${id}`);
         const updateData = {
             title: card.querySelector('.edit-title').value,
             date: card.querySelector('.edit-date').value,
             url: card.querySelector('.edit-url').value
         };
-
-        db.ref('class_links/' + id).update(updateData)
-        .then(() => {
-            editId = null; // 수정 모드 해제
-            return db.ref('class_links').once('value'); // 최신 데이터 강제 재조회
-        })
-        .then((snap) => {
-            allDataCache = snap.val();
-            renderLinks(allDataCache); // 화면 즉시 갱신
-        })
-        .catch(err => alert("저장에 실패했습니다: " + err.message));
+        await db.ref('class_links/' + id).update(updateData);
+        editId = null;
+        const snap = await db.ref('class_links').once('value');
+        renderLinks(snap.val());
     }
 
     function toggleCheck(id, currentStatus) {
@@ -260,21 +283,9 @@
         db.ref('class_links/' + id).update({ checked: !currentStatus, doneTime: timeStr });
     }
 
-    function startEdit(id) {
-        editId = id;
-        renderLinks(allDataCache);
-    }
-
-    function cancelEdit() {
-        editId = null;
-        renderLinks(allDataCache);
-    }
-
-    function deleteLink(id) {
-        if(confirm("정말 삭제하시겠습니까?")) {
-            db.ref('class_links/' + id).remove();
-        }
-    }
+    function startEdit(id) { editId = id; renderLinks(allDataCache); }
+    function cancelEdit() { editId = null; renderLinks(allDataCache); }
+    function deleteLink(id) { if(confirm("삭제하시겠습니까?")) db.ref('class_links/' + id).remove(); }
 </script>
 </body>
 </html>
