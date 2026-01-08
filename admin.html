@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📝 수업 링크 등록</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <style>
+        :root { --primary: #60a5fa; --bg: #f8fafc; }
+        body { font-family: 'Pretendard', sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .card { background: white; width: 90%; max-width: 400px; padding: 30px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        h1 { text-align: center; color: var(--primary); margin-bottom: 25px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #64748b; font-size: 0.9rem; }
+        select, input { width: 100%; padding: 12px; border: 2px solid #f1f5f9; border-radius: 12px; font-size: 16px; outline: none; box-sizing: border-box; }
+        .save-btn { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: bold; font-size: 1.1rem; cursor: pointer; margin-top: 10px; }
+        .back-btn { display: block; text-align: center; margin-top: 15px; color: #94a3b8; text-decoration: none; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>📝 수업 등록</h1>
+    <div class="form-group"><label>학생</label><select id="new-user"><option value="황다연">황다연</option><option value="김보석">김보석</option></select></div>
+    <div class="form-group"><label>날짜</label><input type="date" id="new-date"></div>
+    <div class="form-group"><label>제목</label><input type="text" id="new-title" placeholder="수업 제목 입력"></div>
+    <div class="form-group"><label>URL</label><input type="text" id="new-url" placeholder="영상 링크 붙여넣기"></div>
+    <button class="save-btn" onclick="addLink()">등록하기</button>
+    <a href="index.html" class="back-btn">← 목록으로 돌아가기</a>
+</div>
+<script>
+        const firebaseConfig = {
+  apiKey: "AIzaSyAHvOrb4B3c1uY7WwaR1yuQrwP5lDbRZiI",
+  authDomain: "linkmanage-d8efd.firebaseapp.com",
+  databaseURL: "https://linkmanage-d8efd-default-rtdb.firebaseio.com",
+  projectId: "linkmanage-d8efd",
+  storageBucket: "linkmanage-d8efd.firebasestorage.app",
+  messagingSenderId: "517672204798",
+  appId: "1:517672204798:web:ec8315e84a5120648868af",
+  measurementId: "G-6J7VGJ2CXM"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    document.getElementById('new-date').valueAsDate = new Date();
+
+    function addLink() {
+        const user = document.getElementById('new-user').value;
+        const date = document.getElementById('new-date').value;
+        const title = document.getElementById('new-title').value;
+        const url = document.getElementById('new-url').value;
+        if(!user || !date || !title || !url) return alert("내용을 입력해주세요!");
+        const newRef = db.ref('class_links').push();
+        newRef.set({ id: newRef.key, user, date, title, url, checked: false, doneTime: '-' })
+        .then(() => { alert("등록 완료!"); window.location.href = "index.html"; });
+    }
+</script>
+</body>
+</html>
