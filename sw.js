@@ -1,3 +1,12 @@
-self.addEventListener('fetch', function(event) {
-    // 앱 설치 기능을 활성화하기 위한 최소한의 코드입니다.
+const CACHE_NAME = 'study-v1';
+const urlsToCache = ['./index.html'];
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache)));
+});
+
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    caches.match(event.request).then((response) => response || fetch(event.request))
+  );
 });

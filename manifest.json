@@ -1,8 +1,7 @@
 {
   "name": "수업 관리 시스템",
   "short_name": "수업관리",
-  "start_url": "https://hwangjaeyoun.github.io/study_links/",
-  "scope": "https://hwangjaeyoun.github.io/study_links/",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#fefce8",
   "theme_color": "#f59e0b",
@@ -11,7 +10,7 @@
       "src": "https://cdn-icons-png.flaticon.com/512/5832/5832416.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ]
 }
