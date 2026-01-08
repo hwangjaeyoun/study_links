@@ -2,116 +2,170 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>💻 수업 관리</title>
+    <title>💻 수업 관리 시스템 (PC)</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
-        :root { --primary: #60a5fa; --bg: #f0f9ff; }
-        body { font-family: 'Pretendard', sans-serif; background: var(--bg); padding: 40px; margin: 0; }
-        .container { max-width: 1100px; margin: 0 auto; background: white; padding: 30px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        .header-area { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .nav-btns { display: flex; gap: 10px; }
-        .reg-btn { padding: 10px 20px; background: var(--primary); color: white; text-decoration: none; border-radius: 10px; font-weight: bold; }
-        select { padding: 10px; border-radius: 10px; border: 1px solid #ddd; }
-        table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
-        th { background: #f8fafc; padding: 15px; color: #64748b; font-size: 0.9rem; border-bottom: 2px solid #f1f5f9; }
-        td { padding: 15px; text-align: center; background: #fff; border-bottom: 1px solid #f1f5f9; }
-        .video-link { background: #2563eb; color: white; padding: 7px 15px; border-radius: 8px; text-decoration: none; font-size: 0.85rem; }
-        .btn-mini { border: none; background: #f1f5f9; padding: 5px 10px; border-radius: 5px; cursor: pointer; color: #64748b; }
-        .done { opacity: 0.5; }
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        :root { 
+            --primary: #3b82f6; 
+            --header-bg: #e0e7ff; 
+            --header-text: #4338ca; 
+            --bg: #fefce8; 
+            --white: #ffffff; 
+            --text-main: #1e293b; 
+            --text-sub: #64748b; 
+        }
+        body { font-family: 'Pretendard', sans-serif; background-color: var(--bg); margin: 0; padding: 40px 20px; color: var(--text-main); }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header-area { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        h1 { font-size: 1.8rem; font-weight: 800; color: #854d0e; margin: 0; }
+        .nav-btns { display: flex; gap: 12px; align-items: center; }
+        select { padding: 10px 15px; border-radius: 12px; border: 1px solid #fde68a; outline: none; background: white; cursor: pointer; }
+        .reg-btn { padding: 11px 22px; background-color: #f59e0b; color: white; text-decoration: none; border-radius: 12px; font-weight: 600; }
+
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); }
+        th { padding: 18px 20px; background-color: var(--header-bg); color: var(--header-text); font-size: 0.9rem; font-weight: 700; border-bottom: 2px solid #c7d2fe; }
+        td { padding: 16px 20px; text-align: center; border-bottom: 1px solid #fef3c7; }
+        
+        /* ✨ 완료 상태 디자인: 취소선 없음, 기울임체, 연한 색상 */
+        .done td { background-color: #fafafa !important; }
+        .done .title-text { font-style: italic; color: #94a3b8; text-decoration: none; }
+        .done .date-text, .done .check-time-text { font-style: italic; color: #cbd5e1; }
+
+        .user-badge { background: #fef3c7; color: #92400e; padding: 5px 12px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; }
+        .video-link { background: #3b82f6; color: white; padding: 8px 16px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 0.85rem; }
+        .btn-mini { border: none; padding: 7px 12px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 600; margin-left: 4px; }
+        .btn-edit { background: #fef9c3; color: #854d0e; border: 1px solid #fde68a; }
+        .btn-del { background: #fee2e2; color: #991b1b; }
+        .edit-input { width: 95%; padding: 8px; border: 1px solid #f59e0b; border-radius: 6px; }
     </style>
 </head>
 <body>
+
 <div class="container">
     <div class="header-area">
-        <h1>💻 수업 목록 </h1>
+        <h1>💻 수업 관리 시스템</h1>
         <div class="nav-btns">
             <select id="user-filter" onchange="renderLinks(allDataCache)">
-                <option value="전체">전체 보기</option>
+                <option value="전체">👤 전체 필터</option>
                 <option value="황다연">황다연</option>
                 <option value="김보석">김보석</option>
             </select>
-            <a href="admin.html" class="reg-btn">+ 수업 등록하기</a>
+            <a href="admin.html" class="reg-btn">+ 새 수업 등록</a>
         </div>
     </div>
-    <table>
+    <table id="data-table">
         <thead>
             <tr>
-                <th style="width:100px;">이름</th><th style="width:120px;">날짜</th><th>제목</th>
-                <th style="width:120px;">영상</th><th style="width:80px;">완료</th><th style="width:120px;">시간</th><th style="width:120px;">관리</th>
+                <th style="width:10%;">학생</th><th style="width:12%;">날짜</th><th>수업 주제</th>
+                <th style="width:12%;">강의 영상</th><th style="width:8%;">완료</th><th style="width:12%;">체크시각</th><th style="width:15%;">관리</th>
             </tr>
         </thead>
         <tbody id="pc-table-body"></tbody>
     </table>
 </div>
+
 <script>
     const firebaseConfig = {
-  apiKey: "AIzaSyAHvOrb4B3c1uY7WwaR1yuQrwP5lDbRZiI",
-  authDomain: "linkmanage-d8efd.firebaseapp.com",
-  databaseURL: "https://linkmanage-d8efd-default-rtdb.firebaseio.com",
-  projectId: "linkmanage-d8efd",
-  storageBucket: "linkmanage-d8efd.firebasestorage.app",
-  messagingSenderId: "517672204798",
-  appId: "1:517672204798:web:ec8315e84a5120648868af",
-  measurementId: "G-6J7VGJ2CXM"
+        apiKey: "AIzaSyAHvOrb4B3c1uY7WwaR1yuQrwP5lDbRZiI",
+        authDomain: "linkmanage-d8efd.firebaseapp.com",
+        databaseURL: "https://linkmanage-d8efd-default-rtdb.firebaseio.com",
+        projectId: "linkmanage-d8efd",
+        storageBucket: "linkmanage-d8efd.firebasestorage.app",
+        messagingSenderId: "517672204798",
+        appId: "1:517672204798:web:ec8315e84a5120648868af",
+        measurementId: "G-6J7VGJ2CXM"
     };
+
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     let allDataCache = null;
     let editId = null;
 
-    db.ref('class_links').on('value', (snap) => { allDataCache = snap.val(); renderLinks(allDataCache); });
-
-    function toggleCheck(id, currentStatus) {
-        const now = new Date();
-        const timeStr = !currentStatus ? `${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}` : '-';
-        db.ref('class_links/' + id).update({ checked: !currentStatus, doneTime: timeStr });
-    }
-
-    function startEdit(id) { editId = id; renderLinks(allDataCache); }
-
-function saveEdit(id) {
-        const tr = document.getElementById(`row-${id}`);
-        const updateData = {
-            date: tr.querySelector('.ed-date').value,
-            title: tr.querySelector('.ed-title').value,
-            url: tr.querySelector('.ed-url').value
-        };
-
-        // 1. 데이터 업데이트
-        db.ref('class_links/' + id).update(updateData)
-        .then(() => {
-            editId = null; // 수정 모드 종료
-            // 2. 서버에서 최신 데이터를 한 번 더 가져와서 (once) 재조회 보장
-            return db.ref('class_links').once('value');
-        })
-        .then((snapshot) => {
-            allDataCache = snapshot.val();
-            renderLinks(allDataCache); // 최신 데이터로 화면 갱신
-            console.log("PC 데이터 수정 및 재조회 완료");
-        })
-        .catch(err => alert("저장 실패: " + err.message));
-    }
-    function deleteLink(id) { if(confirm("삭제하시겠습니까?")) db.ref('class_links/' + id).remove(); }
+    // 1. 데이터 실시간 감시 (재조회 자동화)
+    db.ref('class_links').on('value', (snap) => {
+        allDataCache = snap.val();
+        renderLinks(allDataCache);
+    });
 
     function renderLinks(data) {
         const tbody = document.getElementById('pc-table-body');
         const filter = document.getElementById('user-filter').value;
         tbody.innerHTML = '';
-        if(!data) return;
-        Object.values(data).sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(link => {
+        if (!data) return;
+
+        const items = Object.keys(data).map(key => ({ ...data[key], id: key }));
+        items.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        items.forEach(link => {
             if (filter !== "전체" && link.user !== filter) return;
             const tr = document.createElement('tr');
-            if(link.checked) tr.className = 'done';
-            if(editId === link.id) {
+            if (link.checked) tr.className = 'done';
+            
+            if (editId === link.id) {
                 tr.id = `row-${link.id}`;
-                tr.innerHTML = `<td>${link.user}</td><td><input type="date" class="ed-date" value="${link.date}"></td><td><input type="text" class="ed-title" value="${link.title}"></td><td><input type="text" class="ed-url" value="${link.url}"></td><td colspan="2">수정 중</td><td><button onclick="saveEdit('${link.id}')" class="btn-mini" style="background:#bbf7d0;">저장</button></td>`;
+                tr.innerHTML = `
+                    <td><span class="user-badge">${link.user}</span></td>
+                    <td><input type="date" class="edit-input ed-date" value="${link.date}"></td>
+                    <td><input type="text" class="edit-input ed-title" value="${link.title}"></td>
+                    <td><input type="text" class="edit-input ed-url" value="${link.url}"></td>
+                    <td colspan="2" style="color:#d97706; font-weight:bold;">수정 중...</td>
+                    <td><button onclick="saveEdit('${link.id}')" class="btn-mini" style="background:#f59e0b; color:white;">저장</button></td>
+                `;
             } else {
-                tr.innerHTML = `<td>${link.user}</td><td>${link.date}</td><td><strong>${link.title}</strong></td><td><a href="${link.url}" target="_blank" class="video-link">영상보기</a></td><td><input type="checkbox" ${link.checked?'checked':''} onchange="toggleCheck('${link.id}',${link.checked})"></td><td>${link.doneTime}</td><td><button onclick="startEdit('${link.id}')" class="btn-mini">수정</button> <button onclick="deleteLink('${link.id}')" class="btn-mini">삭제</button></td>`;
+                tr.innerHTML = `
+                    <td><span class="user-badge">${link.user}</span></td>
+                    <td class="date-text">${link.date}</td>
+                    <td style="text-align:left; font-weight:600;" class="title-text">${link.title}</td>
+                    <td><a href="${link.url}" target="_blank" class="video-link">▶ 영상보기</a></td>
+                    <td><input type="checkbox" ${link.checked ? 'checked' : ''} onchange="toggleCheck('${link.id}', ${link.checked})"></td>
+                    <td class="check-time-text">${link.doneTime || '-'}</td>
+                    <td>
+                        <button onclick="startEdit('${link.id}')" class="btn-mini btn-edit">수정</button>
+                        <button onclick="deleteLink('${link.id}')" class="btn-mini btn-del">삭제</button>
+                    </td>
+                `;
             }
             tbody.appendChild(tr);
         });
     }
+
+    // 2. 저장 후 재조회 로직
+function saveEdit(id) {
+    const tr = document.getElementById(`row-${id}`);
+    const updateData = {
+        date: tr.querySelector('.ed-date').value,
+        title: tr.querySelector('.ed-title').value,
+        url: tr.querySelector('.ed-url').value
+    };
+
+    // 1. 데이터베이스 업데이트
+    db.ref('class_links/' + id).update(updateData)
+    .then(() => {
+        // 2. 수정 모드 변수 초기화 (중요)
+        editId = null; 
+        
+        // 3. 서버에서 최신 데이터를 명시적으로 다시 한 번 가져옴 (강제 재조회)
+        return db.ref('class_links').once('value');
+    })
+    .then((snap) => {
+        allDataCache = snap.val(); // 캐시 갱신
+        renderLinks(allDataCache); // 화면 다시 그리기
+        console.log("데이터 재조회 완료");
+    })
+    .catch(err => {
+        console.error("저장 중 오류 발생:", err);
+        alert("저장에 실패했습니다.");
+    });
+}
+    function toggleCheck(id, currentStatus) {
+        const now = new Date();
+        const timeStr = !currentStatus ? `${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}` : '-';
+        db.ref('class_links/' + id).update({ checked: !currentStatus, doneTime: timeStr });
+    }
+    function startEdit(id) { editId = id; renderLinks(allDataCache); }
+    function deleteLink(id) { if(confirm("삭제하시겠습니까?")) db.ref('class_links/' + id).remove(); }
 </script>
 </body>
 </html>

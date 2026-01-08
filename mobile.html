@@ -3,46 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>📱 수업 관리</title>
+    <title>📱 수업 관리 </title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
-        :root { --primary: #60a5fa; --bg: #f0f9ff; --text: #444; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: var(--text); }
+        :root { 
+            --primary: #f59e0b; 
+            --bg: #fefce8; /* 연한 노란색 바탕 */
+            --white: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #94a3b8; /* 완료 시 연한 색상 */
+        }
         
-        /* 상단 헤더 및 버튼 */
+        body { 
+            font-family: -apple-system, sans-serif; 
+            background: var(--bg); 
+            margin: 0; 
+            padding: 15px; 
+            color: var(--text-main);
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* 헤더 영역 */
         .header { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-        .reg-btn-mob { background: var(--primary); color: white; text-align: center; padding: 15px; border-radius: 15px; text-decoration: none; font-weight: bold; font-size: 1.1rem; box-shadow: 0 4px 10px rgba(96, 165, 250, 0.3); }
-        select { padding: 12px; border-radius: 12px; border: 2px solid #e0f2fe; background: white; font-size: 16px; outline: none; }
+        .reg-btn-mob { 
+            background: var(--primary); 
+            color: white; 
+            text-align: center; 
+            padding: 15px; 
+            border-radius: 15px; 
+            text-decoration: none; 
+            font-weight: bold; 
+            font-size: 1.1rem; 
+            box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2); 
+        }
+        select { 
+            padding: 12px; 
+            border-radius: 12px; 
+            border: 1px solid #fde68a; 
+            background: white; 
+            font-size: 16px; 
+            outline: none; 
+            cursor: pointer;
+        }
 
-        /* 카드 스타일 */
-        .link-card { background: white; padding: 18px; border-radius: 20px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); display: flex; flex-direction: column; gap: 10px; transition: 0.3s; }
-        .card-header { display: flex; justify-content: space-between; align-items: center; }
-        .user-tag { background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: bold; }
+        /* 카드 리스트 디자인 */
+        .link-card { 
+            background: white; 
+            padding: 18px; 
+            border-radius: 20px; 
+            margin-bottom: 15px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03); 
+            display: flex; 
+            flex-direction: column; 
+            gap: 8px; 
+            transition: all 0.2s;
+        }
         
-        /* 수정/삭제 미니 버튼 */
+        .card-header { display: flex; justify-content: space-between; align-items: center; }
+        .user-tag { background: #fef3c7; color: #92400e; padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: bold; }
+        
         .admin-btns { display: flex; gap: 8px; }
-        .btn-mini { padding: 5px 10px; font-size: 0.75rem; border-radius: 6px; border: none; background: #f1f5f9; color: #94a3b8; cursor: pointer; }
+        .btn-mini { padding: 6px 12px; font-size: 0.75rem; border-radius: 8px; border: none; background: #f1f5f9; color: #64748b; font-weight: 600; }
 
-        /* 제목 및 정보 */
-        .title-text { font-weight: bold; font-size: 1.1rem; line-height: 1.4; }
+        .title-text { font-weight: bold; font-size: 1.1rem; line-height: 1.4; color: var(--text-main); }
         .info-text { font-size: 0.85rem; color: #888; }
 
-        /* 하단 영상 버튼 & 완료 체크 영역 */
+        /* 하단 버튼 및 체크박스 */
         .video-btn-container { display: flex; align-items: stretch; gap: 10px; margin-top: 5px; }
-        .mobile-video-btn { flex: 2.5; background: #2563eb; color: white; text-align: center; padding: 13px; border-radius: 12px; text-decoration: none; font-weight: bold; font-size: 1rem; display: flex; align-items: center; justify-content: center; }
-        .check-box-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; }
-        .check-label { font-size: 0.75rem; font-weight: bold; color: #64748b; margin-bottom: 2px; }
-        input[type="checkbox"] { width: 26px; height: 26px; accent-color: #2563eb; margin: 0; }
+        .mobile-video-btn { 
+            flex: 2.5; 
+            background: #2563eb; 
+            color: white; 
+            text-align: center; 
+            padding: 13px; 
+            border-radius: 12px; 
+            text-decoration: none; 
+            font-weight: bold; 
+        }
+        .check-box-area { 
+            flex: 1; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            background: #fffbeb; 
+            border-radius: 12px; 
+            border: 1px solid #fde68a; 
+        }
+        input[type="checkbox"] { width: 24px; height: 24px; accent-color: #2563eb; }
+
+        /* ✨ 완료 상태 디자인: 취소선 없음, 기울임체, 연한 색상 */
+        .done { background: #fafafa !important; border: 1px solid #eee; }
+        .done .title-text { 
+            text-decoration: none !important; 
+            font-style: italic; 
+            color: var(--text-muted); 
+        }
+        .done .info-text { font-style: italic; color: #cbd5e1; }
 
         /* 수정 모드 입력창 */
-        .edit-group { display: flex; flex-direction: column; gap: 8px; }
-        .edit-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 15px; box-sizing: border-box; }
-        .save-btn { background: #10b981; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; }
-
-        /* 완료 상태 효과 */
-        .done { opacity: 0.6; background: #f1f5f9; }
-        .done .title-text { text-decoration: line-through; color: #94a3b8; }
+        .edit-input { 
+            width: 100%; 
+            padding: 12px; 
+            border: 2px solid #fde68a; 
+            border-radius: 12px; 
+            font-size: 15px; 
+            box-sizing: border-box; 
+            margin-bottom: 8px; 
+            outline: none;
+        }
+        .save-btn { 
+            background: #10b981; 
+            color: white; 
+            border: none; 
+            padding: 14px; 
+            border-radius: 12px; 
+            font-weight: bold; 
+            width: 100%; 
+            font-size: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -57,11 +136,11 @@
 </div>
 
 <div id="mobile-card-container">
-    <p style="text-align:center; color:#94a3b8;">데이터를 불러오는 중... 🧸</p>
+    <div style="text-align:center; padding:50px; color:#94a3b8;">데이터를 불러오는 중...</div>
 </div>
 
 <script>
-    // Firebase 설정 (본인의 정보를 입력하세요)
+    // Firebase 설정 (본인의 설정값으로 유지하세요)
     const firebaseConfig = {
         apiKey: "AIzaSyAHvOrb4B3c1uY7WwaR1yuQrwP5lDbRZiI",
         authDomain: "linkmanage-d8efd.firebaseapp.com",
@@ -78,26 +157,68 @@
     let allDataCache = null;
     let editId = null;
 
-    // 데이터 실시간 수신
+    // 데이터 실시간 감시
     db.ref('class_links').on('value', (snap) => {
         allDataCache = snap.val();
         renderLinks(allDataCache);
     });
 
-    // 완료 체크 토글
-    function toggleCheck(id, currentStatus) {
-        const now = new Date();
-        const timeStr = !currentStatus ? `${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}` : '-';
-        db.ref('class_links/' + id).update({ checked: !currentStatus, doneTime: timeStr });
+    function renderLinks(data) {
+        const container = document.getElementById('mobile-card-container');
+        const filter = document.getElementById('user-filter').value;
+        container.innerHTML = '';
+        
+        if(!data) {
+            container.innerHTML = '<div style="text-align:center; padding:50px; color:#94a3b8;">등록된 수업이 없습니다.</div>';
+            return;
+        }
+
+        // 데이터를 배열로 변환 후 최신순 정렬
+        const items = Object.keys(data).map(key => ({ ...data[key], id: key }));
+        items.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        items.forEach(link => {
+            if (filter !== "전체" && link.user !== filter) return;
+            
+            const div = document.createElement('div');
+            div.id = `mob-card-${link.id}`;
+            div.className = `link-card ${link.checked ? 'done' : ''}`;
+
+            if(editId === link.id) {
+                // 수정 모드 레이아웃
+                div.innerHTML = `
+                    <div style="font-weight:bold; margin-bottom:10px; color:var(--primary);">수업 정보 수정</div>
+                    <input type="text" class="edit-input edit-title" value="${link.title}" placeholder="수업 제목">
+                    <input type="date" class="edit-input edit-date" value="${link.date}">
+                    <input type="text" class="edit-input edit-url" value="${link.url}" placeholder="영상 URL">
+                    <div style="display:flex; gap:10px; margin-top:5px;">
+                        <button onclick="saveEdit('${link.id}')" class="save-btn">저장하기</button>
+                        <button onclick="cancelEdit()" class="btn-mini" style="padding:14px; flex:0.4; background:#e2e8f0;">취소</button>
+                    </div>`;
+            } else {
+                // 일반 보기 레이아웃
+                div.innerHTML = `
+                    <div class="card-header">
+                        <span class="user-tag">${link.user}</span>
+                        <div class="admin-btns">
+                            <button onclick="startEdit('${link.id}')" class="btn-mini">수정</button>
+                            <button onclick="deleteLink('${link.id}')" class="btn-mini" style="color:#ef4444;">삭제</button>
+                        </div>
+                    </div>
+                    <div class="title-text">${link.title}</div>
+                    <div class="info-text">📅 ${link.date} ${link.checked ? ` | ✅ ${link.doneTime}` : ''}</div>
+                    <div class="video-btn-container">
+                        <a href="${link.url}" target="_blank" class="mobile-video-btn">▶ 영상 바로보기</a>
+                        <div class="check-box-area">
+                            <input type="checkbox" ${link.checked ? 'checked' : ''} onchange="toggleCheck('${link.id}', ${link.checked})">
+                        </div>
+                    </div>`;
+            }
+            container.appendChild(div);
+        });
     }
 
-    // 수정 모드 시작
-    function startEdit(id) {
-        editId = id;
-        renderLinks(allDataCache);
-    }
-
-    // 수정 저장 및 재조회
+    // ✨ 저장 후 즉시 재조회 로직 보강
     function saveEdit(id) {
         const card = document.getElementById(`mob-card-${id}`);
         const updateData = {
@@ -108,85 +229,37 @@
 
         db.ref('class_links/' + id).update(updateData)
         .then(() => {
-            editId = null;
-            // 수정 완료 후 즉시 다시 조회하여 최신화 보장
-            return db.ref('class_links').once('value');
+            editId = null; // 수정 모드 해제
+            return db.ref('class_links').once('value'); // 최신 데이터 강제 재조회
         })
-        .then(snap => {
+        .then((snap) => {
             allDataCache = snap.val();
-            renderLinks(allDataCache);
-            console.log("재조회 완료 ✨");
+            renderLinks(allDataCache); // 화면 즉시 갱신
         })
-        .catch(err => alert("저장 실패: " + err.message));
+        .catch(err => alert("저장에 실패했습니다: " + err.message));
     }
 
-    // 삭제 기능
+    function toggleCheck(id, currentStatus) {
+        const now = new Date();
+        const timeStr = !currentStatus ? `${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}` : '-';
+        db.ref('class_links/' + id).update({ checked: !currentStatus, doneTime: timeStr });
+    }
+
+    function startEdit(id) {
+        editId = id;
+        renderLinks(allDataCache);
+    }
+
+    function cancelEdit() {
+        editId = null;
+        renderLinks(allDataCache);
+    }
+
     function deleteLink(id) {
-        if(confirm("정말 이 기록을 삭제하시겠습니까?")) {
+        if(confirm("정말 삭제하시겠습니까?")) {
             db.ref('class_links/' + id).remove();
         }
     }
-
-    // 화면 렌더링 함수
-    function renderLinks(data) {
-        const container = document.getElementById('mobile-card-container');
-        const filter = document.getElementById('user-filter').value;
-        container.innerHTML = '';
-
-        if(!data) {
-            container.innerHTML = '<p style="text-align:center; color:#94a3b8; margin-top:50px;">등록된 수업이 없습니다. ✨</p>';
-            return;
-        }
-
-        // 날짜 역순 정렬
-        const sortedData = Object.values(data).sort((a,b) => new Date(b.date) - new Date(a.date));
-
-        sortedData.forEach(link => {
-            if (filter !== "전체" && link.user !== filter) return;
-
-            const div = document.createElement('div');
-            div.id = `mob-card-${link.id}`;
-            div.className = `link-card ${link.checked ? 'done' : ''}`;
-
-            if(editId === link.id) {
-                // --- 수정 모드 UI ---
-                div.innerHTML = `
-                    <div class="edit-group">
-                        <label style="font-size:0.8rem; color:var(--primary); font-weight:bold;">수업 정보 수정</label>
-                        <input type="text" class="edit-input edit-title" value="${link.title}" placeholder="제목">
-                        <input type="date" class="edit-input edit-date" value="${link.date}">
-                        <input type="text" class="edit-input edit-url" value="${link.url}" placeholder="URL 주소">
-                        <div style="display:flex; gap:10px;">
-                            <button onclick="saveEdit('${link.id}')" class="save-btn" style="flex:2;">저장하기</button>
-                            <button onclick="editId=null; renderLinks(allDataCache);" class="btn-mini" style="flex:1;">취소</button>
-                        </div>
-                    </div>
-                `;
-            } else {
-                // --- 일반 보기 모드 UI ---
-                div.innerHTML = `
-                    <div class="card-header">
-                        <span class="user-tag">${link.user}</span>
-                        <div class="admin-btns">
-                            <button onclick="startEdit('${link.id}')" class="btn-mini">수정</button>
-                            <button onclick="deleteLink('${link.id}')" class="btn-mini">삭제</button>
-                        </div>
-                    </div>
-                    <div class="title-text">${link.title}</div>
-                    <div class="info-text">📅 ${link.date} ${link.checked ? ` | ✅ ${link.doneTime}` : ''}</div>
-                    <div class="video-btn-container">
-                        <a href="${link.url}" target="_blank" class="mobile-video-btn">▶ 영상 바로보기</a>
-                        <div class="check-box-area">
-                            <span class="check-label">완료</span>
-                            <input type="checkbox" ${link.checked ? 'checked' : ''} onchange="toggleCheck('${link.id}', ${link.checked})">
-                        </div>
-                    </div>
-                `;
-            }
-            container.appendChild(div);
-        });
-    }
 </script>
-
 </body>
 </html>
