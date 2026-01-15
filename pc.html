@@ -44,6 +44,9 @@
         .btn-del { background: #fee2e2; color: #991b1b; }
         .edit-input { width: 95%; padding: 8px; border: 1px solid #f59e0b; border-radius: 6px; }
         .hidden { display: none; }
+        
+        /* 히스토리 전용 스타일 */
+        .device-badge { background: #e0f2fe; color: #0369a1; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -82,7 +85,7 @@
         <table>
             <thead>
                 <tr>
-                    <th style="width:20%;">클릭 시각</th><th style="width:15%;">학생</th><th>수업 주제</th><th style="width:15%;">링크</th>
+                    <th style="width:20%;">클릭 시각</th><th style="width:10%;">학생</th><th style="width:10%;">기기</th><th>수업 주제</th><th style="width:10%;">링크</th><th style="width:8%;">삭제</th>
                 </tr>
             </thead>
             <tbody id="history-table-body"></tbody>
@@ -119,11 +122,11 @@
             document.getElementById('section-history').classList.remove('hidden');
             document.getElementById('btn-list').classList.remove('active');
             document.getElementById('btn-history').classList.add('active');
-            loadClickHistory(); // 히스토리 데이터 로드
+            loadClickHistory(); 
         }
     }
 
-    // --- 영상 클릭 기록 저장 ---
+    // --- 영상 클릭 기록 저장 (PC 표시 추가) ---
     function recordClick(user, title, url) {
         const now = new Date();
         const timestamp = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
@@ -132,34 +135,52 @@
             user: user,
             title: title,
             url: url,
-            time: timestamp
+            time: timestamp,
+            device: "PC" // PC라고 명시
         });
     }
 
-    // --- 히스토리 불러오기 ---
+    // --- 히스토리 불러오기 (기기 표시 및 삭제 기능 추가) ---
     function loadClickHistory() {
         db.ref('click_logs').limitToLast(100).once('value', (snap) => {
             const tbody = document.getElementById('history-table-body');
             tbody.innerHTML = '';
             const logs = snap.val();
-            if (!logs) return;
+            if (!logs) {
+                tbody.innerHTML = '<tr><td colspan="6" style="padding:30px; color:#94a3b8;">기록이 없습니다.</td></tr>';
+                return;
+            }
 
             // 최신순 정렬
             Object.keys(logs).reverse().forEach(key => {
                 const log = logs[key];
+                const device = log.device || 'Unknown'; // 기존 데이터 호환
+                
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td style="color:#64748b; font-size:0.85rem;">${log.time}</td>
                     <td><span class="user-badge">${log.user}</span></td>
+                    <td><span class="device-badge">${device}</span></td>
                     <td style="text-align:left; font-weight:600;">${log.title}</td>
-                    <td><a href="${log.url}" target="_blank" style="color:#3b82f6; font-size:0.8rem;">영상 이동</a></td>
+                    <td><a href="${log.url}" target="_blank" style="color:#3b82f6; font-size:0.8rem;">이동</a></td>
+                    <td><button onclick="deleteHistory('${key}')" class="btn-mini btn-del">삭제</button></td>
                 `;
                 tbody.appendChild(tr);
             });
         });
     }
 
-    // 1. 데이터 실시간 감시
+    // --- 히스토리 삭제 함수 ---
+    function deleteHistory(key) {
+        if(confirm("이 기록을 삭제하시겠습니까?")) {
+            db.ref('click_logs/' + key).remove()
+            .then(() => {
+                loadClickHistory(); // 목록 새로고침
+            });
+        }
+    }
+
+    // 1. 데이터 실시간 감시 (기존 코드)
     db.ref('class_links').on('value', (snap) => {
         allDataCache = snap.val();
         renderLinks(allDataCache);
