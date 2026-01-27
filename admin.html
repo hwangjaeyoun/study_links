@@ -40,65 +40,56 @@
   measurementId: "G-6J7VGJ2CXM"
     };
 
-   const YOUTUBE_API_KEY = "AIzaSyCSKPPjEy4LIMV289ivkCom8zKwgcUO2ng"; // 여기에 발급받은 API 키를 넣으세요.
-
-    const urlInput = document.getElementById('new-url');
-    const titleInput = document.getElementById('new-title');
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     document.getElementById('new-date').valueAsDate = new Date();
 
-// URL 입력 시 유튜브 정보 가져오기 이벤트 리스너
+   const YOUTUBE_API_KEY = "AIzaSyCSKPPjEy4LIMV289ivkCom8zKwgcUO2ng"; // 여기에 발급받은 API 키를 넣으세요.
+let fetchedDuration = ""; // 재생시간을 별도로 담을 변수
+
+    const urlInput = document.getElementById('new-url');
+    const titleInput = document.getElementById('new-title');
+
+    // URL 입력 시 유튜브 정보 가져오기
     urlInput.addEventListener('blur', function() {
-        const url = this.value;
+        const url = this.value.trim();
         const videoId = extractVideoId(url);
-        
-        if (videoId) {
-            fetchYouTubeInfo(videoId);
-        }
+        if (videoId) fetchYouTubeInfo(videoId);
     });
 
-    // 유튜브 URL에서 Video ID 추출 함수
     function extractVideoId(url) {
         const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
         const match = url.match(regExp);
         return (match && match[7].length == 11) ? match[7] : false;
     }
 
-    // API를 통해 제목과 재생시간 가져오기
-    function fetchYouTubeInfo(videoId) {
+    async function fetchYouTubeInfo(videoId) {
         const apiUrl = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${YOUTUBE_API_KEY}&part=snippet,contentDetails`;
-
-        fetch(apiUrl)
-        .then(res => res.json())
-        .then(data => {
+        
+        try {
+            const response = await fetch(apiUrl);
+            const data = await response.json();
+            
             if (data.items && data.items.length > 0) {
                 const snippet = data.items[0].snippet;
                 const details = data.items[0].contentDetails;
 
-                // 1. 제목 자동 입력
-                titleInput.value = snippet.title;
-
-                // 2. 재생 시간 변환 (ISO 8601 -> 읽기 쉬운 형식)
-                const duration = parseYouTubeDuration(details.duration);
-                
-                // 제목 뒤에 재생시간 추가 (예: 수업 제목 [05:20])
-                titleInput.value = `${snippet.title} [${duration}]`;
-                
-                console.log("유튜브 정보 로드 완료:", snippet.title, duration);
+                titleInput.value = snippet.title; // 제목만 입력
+                fetchedDuration = parseYouTubeDuration(details.duration); // 시간 저장
+                console.log("불러오기 성공:", snippet.title, fetchedDuration);
+            } else {
+                console.log("영상을 찾을 수 없습니다. API 키나 URL을 확인하세요.");
             }
-        })
-        .catch(err => console.error("유튜브 정보를 가져오는데 실패했습니다.", err));
+        } catch (err) {
+            console.error("API 호출 중 오류 발생:", err);
+        }
     }
 
-    // ISO 8601 기간 포맷(PT5M20S)을 05:20 형식으로 변환
     function parseYouTubeDuration(duration) {
         const match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
         const hours = (parseInt(match[1]) || 0);
         const minutes = (parseInt(match[2]) || 0);
         const seconds = (parseInt(match[3]) || 0);
-
         let result = "";
         if (hours > 0) result += hours + ":";
         result += (minutes < 10 && hours > 0 ? "0" + minutes : minutes) + ":";
@@ -111,11 +102,24 @@
         const date = document.getElementById('new-date').value;
         const title = document.getElementById('new-title').value;
         const url = document.getElementById('new-url').value;
-        if(!user || !date || !title || !url) return alert("내용을 입력해주세요!");
-        const newRef = db.ref('class_links').push();
-        newRef.set({ id: newRef.key, user, date, title, url, checked: false, doneTime: '-' })
-        .then(() => { alert("등록 완료!"); window.location.href = "index.html"; });
+
+        if (!title || !url) { alert("제목과 URL을 확인해주세요."); return; }
+
+        // duration 필드를 추가하여 저장
+        db.ref('class_links').push({
+            user,
+            date,
+            title,
+            url,
+            duration: fetchedDuration, // 여기에 저장됨
+            checked: false,
+            doneTime: '-'
+        }).then(() => {
+            alert("등록 완료!");
+            location.href = "index.html";
+        });
     }
 </script>
+
 </body>
 </html>
