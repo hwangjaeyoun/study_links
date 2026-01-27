@@ -6,14 +6,6 @@
     <title>📱 수업 관리</title>
 
     <link rel="manifest" href="./manifest.json">
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js')
-            .then(() => console.log("서비스 워커 등록 성공"))
-            .catch(() => console.log("서비스 워커 등록 실패"));
-        }
-    </script>
-
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
@@ -26,77 +18,35 @@
             --text-muted: #94a3b8;
         }
         
-        body { 
-            font-family: -apple-system, sans-serif; 
-            background: var(--bg); 
-            margin: 0; padding: 0;
-            color: var(--text-main);
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        /* 탭 메뉴 스타일 */
-        .tab-menu {
-            display: flex; background: white; border-bottom: 1px solid #fde68a;
-            position: sticky; top: 0; z-index: 100;
-        }
-        .tab-btn {
-            flex: 1; padding: 15px; border: none; background: none;
-            font-weight: bold; color: #94a3b8; font-size: 0.95rem; cursor: pointer;
-        }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--text-main); -webkit-tap-highlight-color: transparent; }
+        .tab-menu { display: flex; background: white; border-bottom: 1px solid #fde68a; position: sticky; top: 0; z-index: 100; }
+        .tab-btn { flex: 1; padding: 15px; border: none; background: none; font-weight: bold; color: #94a3b8; font-size: 0.95rem; cursor: pointer; }
         .tab-btn.active { color: var(--primary); border-bottom: 3px solid var(--primary); }
 
-        /* 헤더 영역 */
         .header { padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .reg-btn-mob { 
-            background: var(--primary); color: white; text-align: center; 
-            padding: 15px; border-radius: 15px; text-decoration: none; 
-            font-weight: bold; font-size: 1.1rem; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2); 
-        }
-        select { 
-            padding: 12px; border-radius: 12px; border: 1px solid #fde68a; 
-            background: white; font-size: 16px; outline: none;
-        }
+        .reg-btn-mob { background: var(--primary); color: white; text-align: center; padding: 15px; border-radius: 15px; text-decoration: none; font-weight: bold; font-size: 1.1rem; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2); }
+        select { padding: 12px; border-radius: 12px; border: 1px solid #fde68a; background: white; font-size: 16px; outline: none; }
 
-        /* 카드 공통 디자인 */
         #mobile-card-container, #history-container { padding: 0 15px 30px; }
-        .link-card, .history-card { 
-            background: white; padding: 18px; border-radius: 20px; 
-            margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); 
-            display: flex; flex-direction: column; gap: 8px;
-            position: relative; 
-        }
+        .link-card, .history-card { background: white; padding: 18px; border-radius: 20px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); display: flex; flex-direction: column; gap: 8px; position: relative; }
         
         .card-header { display: flex; justify-content: space-between; align-items: center; }
         .user-tag { background: #fef3c7; color: #92400e; padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: bold; }
         
-        /* 히스토리 전용 */
+        .title-text { font-size: 1.1rem; font-weight: bold; color: #1e293b; }
+        .info-text { font-size: 0.85rem; color: #64748b; font-weight: 500; }
         .history-time { font-size: 0.75rem; color: #94a3b8; font-weight: bold; }
         .history-title { font-size: 0.95rem; font-weight: 600; color: #475569; }
-        .delete-hist-btn {
-            position: absolute; top: 15px; right: 15px;
-            background: none; border: none; color: #ef4444; font-weight: bold; font-size: 1.1rem;
-            cursor: pointer; padding: 5px;
-        }
-        .device-info { 
-            font-size: 0.75rem; color: #64748b; background: #f1f5f9; 
-            padding: 4px 8px; border-radius: 6px; display: inline-block; margin-top: 4px; font-family: monospace;
-        }
+        .delete-hist-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; color: #ef4444; font-weight: bold; font-size: 1.1rem; cursor: pointer; padding: 5px; }
+        .device-info { font-size: 0.75rem; color: #64748b; background: #f1f5f9; padding: 4px 8px; border-radius: 6px; display: inline-block; margin-top: 4px; font-family: monospace; }
 
-        /* 기존 버튼 스타일 */
         .video-btn-container { display: flex; align-items: stretch; gap: 10px; margin-top: 5px; }
-        .mobile-video-btn { 
-            flex: 2.5; background: #2563eb; color: white; text-align: center; 
-            padding: 13px; border-radius: 12px; text-decoration: none; font-weight: bold; 
-        }
-        .check-box-area { 
-            flex: 1; display: flex; align-items: center; justify-content: center; 
-            background: #fffbeb; border-radius: 12px; border: 1px solid #fde68a; 
-        }
+        .mobile-video-btn { flex: 2.5; background: #2563eb; color: white; text-align: center; padding: 13px; border-radius: 12px; text-decoration: none; font-weight: bold; }
+        .check-box-area { flex: 1; display: flex; align-items: center; justify-content: center; background: #fffbeb; border-radius: 12px; border: 1px solid #fde68a; }
         input[type="checkbox"] { width: 24px; height: 24px; accent-color: #2563eb; }
 
         .done { background: #fafafa !important; border: 1px solid #eee; }
         .done .title-text { font-style: italic; color: var(--text-muted); }
-
         .hidden { display: none; }
         .edit-input { width: 100%; padding: 12px; border: 2px solid #fde68a; border-radius: 12px; margin-bottom: 8px; box-sizing: border-box; }
         .save-btn { background: #10b981; color: white; border: none; padding: 14px; border-radius: 12px; font-weight: bold; width: 100%; }
@@ -119,9 +69,7 @@
             <option value="김보석">김보석</option>
         </select>
     </div>
-    <div id="mobile-card-container">
-        <div style="text-align:center; padding:50px; color:#94a3b8;">데이터를 불러오는 중...</div>
-    </div>
+    <div id="mobile-card-container"></div>
 </div>
 
 <div id="section-history" class="hidden">
@@ -146,7 +94,6 @@
     let allDataCache = null;
     let editId = null;
 
-    // --- 탭 전환 ---
     function switchTab(tab) {
         if (tab === 'list') {
             document.getElementById('section-list').classList.remove('hidden');
@@ -162,98 +109,41 @@
         }
     }
 
-    // --- 상세 기기 정보 추출 함수 (핵심 추가됨) ---
     function getDetailedDeviceInfo() {
         const ua = navigator.userAgent;
-        let device = "Mobile";
-        let browser = "Web";
-
-        // 1. 안드로이드 모델명 추출 시도 (예: SM-S921N)
-        if (ua.match(/Android/i)) {
-            // User Agent 문자열에서 "; SM-xxxx Build/" 패턴을 찾음
-            const match = ua.match(/;\s([^;]+)\sBuild\//);
-            if (match && match[1]) {
-                device = match[1]; // 모델번호 추출 성공
-            } else {
-                device = "Android Phone";
-            }
-        } else if (ua.match(/iPhone|iPad|iPod/i)) {
-            device = "iPhone"; // 아이폰은 정책상 모델명 확인 불가
-        }
-
-        // 2. 브라우저 종류 확인
-        if (ua.match(/KAKAOTALK/i)) browser = "KakaoTalk";
-        else if (ua.match(/SamsungBrowser/i)) browser = "Samsung";
-        else if (ua.match(/CriOS/i) || ua.match(/Chrome/i)) browser = "Chrome";
-        else if (ua.match(/Safari/i)) browser = "Safari";
-
+        let device = ua.match(/Android/i) ? (ua.match(/;\s([^;]+)\sBuild\//)?.[1] || "Android") : (ua.match(/iPhone|iPad|iPod/i) ? "iPhone" : "Mobile");
+        let browser = ua.match(/KAKAOTALK/i) ? "Kakao" : (ua.match(/SamsungBrowser/i) ? "Samsung" : (ua.match(/Chrome/i) ? "Chrome" : "Safari"));
         return `${device} / ${browser}`;
     }
 
-    // --- 클릭 히스토리 저장 ---
     function recordClick(user, title, url) {
         const now = new Date();
-        const timestamp = `${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
-        
-        // 상세 기기 정보 가져오기
-        const deviceInfo = getDetailedDeviceInfo();
-
-        db.ref('click_logs').push({
-            user: user,
-            title: title,
-            url: url,
-            time: timestamp,
-            device: deviceInfo
-        });
+        const timestamp = `${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
+        db.ref('click_logs').push({ user, title, url, time: timestamp, device: getDetailedDeviceInfo() });
     }
 
-    // --- 히스토리 불러오기 ---
     function loadClickHistory() {
-        const container = document.getElementById('history-container');
-        container.innerHTML = '<div style="text-align:center; padding:30px; color:#94a3b8;">기록 로딩 중...</div>';
-        
         db.ref('click_logs').limitToLast(50).once('value', (snap) => {
+            const container = document.getElementById('history-container');
             container.innerHTML = '';
             const logs = snap.val();
-            if (!logs) {
-                container.innerHTML = '<div style="text-align:center; padding:30px; color:#94a3b8;">기록이 없습니다.</div>';
-                return;
-            }
-
+            if (!logs) return container.innerHTML = '<div style="text-align:center; padding:30px; color:#94a3b8;">기록이 없습니다.</div>';
             Object.keys(logs).reverse().forEach(key => {
                 const log = logs[key];
-                const device = log.device || '-'; 
-
                 const div = document.createElement('div');
                 div.className = 'history-card';
                 div.innerHTML = `
-                    <div class="card-header">
-                        <span class="user-tag">${log.user}</span>
-                        <span class="history-time">${log.time}</span>
-                    </div>
+                    <div class="card-header"><span class="user-tag">${log.user}</span><span class="history-time">${log.time}</span></div>
                     <button class="delete-hist-btn" onclick="deleteHistory('${key}')">✕</button>
                     <div class="history-title">${log.title}</div>
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span class="device-info">📱 ${device}</span>
-                        <span style="font-size:0.75rem; color:#3b82f6;">학습 시작됨</span>
-                    </div>
-                `;
+                    <div style="display:flex; justify-content:space-between;"><span class="device-info">📱 ${log.device || '-'}</span></div>`;
                 container.appendChild(div);
             });
         });
     }
 
-    // --- 히스토리 삭제 함수 ---
-    function deleteHistory(key) {
-        if(confirm("이 기록을 삭제하시겠습니까?")) {
-            db.ref('click_logs/' + key).remove()
-            .then(() => {
-                loadClickHistory(); 
-            });
-        }
-    }
+    function deleteHistory(key) { if(confirm("기록을 삭제할까요?")) db.ref('click_logs/' + key).remove().then(() => loadClickHistory()); }
 
-    // 데이터 감시 및 렌더링 (기존 소스 유지)
     db.ref('class_links').on('value', (snap) => {
         allDataCache = snap.val();
         renderLinks(allDataCache);
@@ -276,31 +166,18 @@
 
             if(editId === link.id) {
                 div.innerHTML = `
-                    <div style="font-weight:bold; margin-bottom:10px; color:var(--primary);">수업 정보 수정</div>
                     <input type="text" class="edit-input edit-title" value="${link.title}">
                     <input type="date" class="edit-input edit-date" value="${link.date}">
                     <input type="text" class="edit-input edit-url" value="${link.url}">
-                    <div style="display:flex; gap:10px; margin-top:5px;">
-                        <button onclick="saveEdit('${link.id}')" class="save-btn">저장하기</button>
-                        <button onclick="cancelEdit()" class="btn-mini" style="padding:14px; flex:0.4;">취소</button>
-                    </div>`;
+                    <div style="display:flex; gap:10px;"><button onclick="saveEdit('${link.id}')" class="save-btn">저장</button><button onclick="cancelEdit()" class="btn-mini" style="flex:0.4;">취소</button></div>`;
             } else {
                 div.innerHTML = `
-                    <div class="card-header">
-                        <span class="user-tag">${link.user}</span>
-                        <div class="admin-btns">
-                            <button onclick="startEdit('${link.id}')" class="btn-mini">수정</button>
-                            <button onclick="deleteLink('${link.id}')" class="btn-mini" style="color:#ef4444;">삭제</button>
-                        </div>
-                    </div>
+                    <div class="card-header"><span class="user-tag">${link.user}</span><div class="admin-btns"><button onclick="startEdit('${link.id}')" class="btn-mini">수정</button><button onclick="deleteLink('${link.id}')" class="btn-mini" style="color:#ef4444;">삭제</button></div></div>
                     <div class="title-text">${link.title}</div>
-                    <div class="info-text">📅 ${link.date} ${link.checked ? ` | ✅ ${link.doneTime}` : ''}</div>
+                    <div class="info-text">📅 ${link.date} ${link.duration ? ` | ⏱️ ${link.duration}` : ''} ${link.checked ? ` | ✅ ${link.doneTime}` : ''}</div>
                     <div class="video-btn-container">
-                        <a href="${link.url}" target="_blank" class="mobile-video-btn" 
-                           onclick="recordClick('${link.user}', '${link.title}', '${link.url}')">▶ 영상 바로보기</a>
-                        <div class="check-box-area">
-                            <input type="checkbox" ${link.checked ? 'checked' : ''} onchange="toggleCheck('${link.id}', ${link.checked})">
-                        </div>
+                        <a href="${link.url}" target="_blank" class="mobile-video-btn" onclick="recordClick('${link.user}', '${link.title}', '${link.url}')">▶ 영상 바로보기</a>
+                        <div class="check-box-area"><input type="checkbox" ${link.checked ? 'checked' : ''} onchange="toggleCheck('${link.id}', ${link.checked})"></div>
                     </div>`;
             }
             container.appendChild(div);
@@ -309,15 +186,9 @@
 
     async function saveEdit(id) {
         const card = document.getElementById(`mob-card-${id}`);
-        const updateData = {
-            title: card.querySelector('.edit-title').value,
-            date: card.querySelector('.edit-date').value,
-            url: card.querySelector('.edit-url').value
-        };
+        const updateData = { title: card.querySelector('.edit-title').value, date: card.querySelector('.edit-date').value, url: card.querySelector('.edit-url').value };
         await db.ref('class_links/' + id).update(updateData);
         editId = null;
-        const snap = await db.ref('class_links').once('value');
-        renderLinks(snap.val());
     }
 
     function toggleCheck(id, currentStatus) {

@@ -20,7 +20,6 @@
         .header-area { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         h1 { font-size: 1.8rem; font-weight: 800; color: #854d0e; margin: 0; }
         
-        /* 탭 메뉴 스타일 */
         .tab-menu { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; }
         .tab-btn { padding: 12px 20px; border: none; background: none; cursor: pointer; font-weight: 700; color: #64748b; font-size: 1rem; }
         .tab-btn.active { color: var(--primary); border-bottom: 3px solid var(--primary); margin-bottom: -2px; }
@@ -35,8 +34,6 @@
         
         .done td { background-color: #fafafa !important; }
         .done .title-text { font-style: italic; color: #94a3b8; text-decoration: none; }
-        .done .date-text, .done .check-time-text { font-style: italic; color: #cbd5e1; }
-
         .user-badge { background: #fef3c7; color: #92400e; padding: 5px 12px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; }
         .video-link { background: #3b82f6; color: white; padding: 8px 16px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 0.85rem; display: inline-block; }
         .btn-mini { border: none; padding: 7px 12px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 600; margin-left: 4px; }
@@ -44,9 +41,8 @@
         .btn-del { background: #fee2e2; color: #991b1b; }
         .edit-input { width: 95%; padding: 8px; border: 1px solid #f59e0b; border-radius: 6px; }
         .hidden { display: none; }
-        
-        /* 히스토리 전용 스타일 */
         .device-badge { background: #e0f2fe; color: #0369a1; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; }
+        .duration-text { color: #64748b; font-weight: bold; font-size: 0.85rem; }
     </style>
 </head>
 <body>
@@ -73,8 +69,14 @@
         <table id="data-table">
             <thead>
                 <tr>
-                    <th style="width:10%;">학생</th><th style="width:12%;">날짜</th><th>수업 주제</th>
-                    <th style="width:12%;">강의 영상</th><th style="width:8%;">완료</th><th style="width:12%;">체크시각</th><th style="width:15%;">관리</th>
+                    <th style="width:10%;">학생</th>
+                    <th style="width:12%;">날짜</th>
+                    <th>수업 주제</th>
+                    <th style="width:10%;">재생 시간</th>
+                    <th style="width:12%;">강의 영상</th>
+                    <th style="width:8%;">완료</th>
+                    <th style="width:12%;">체크시각</th>
+                    <th style="width:15%;">관리</th>
                 </tr>
             </thead>
             <tbody id="pc-table-body"></tbody>
@@ -110,7 +112,6 @@
     let allDataCache = null;
     let editId = null;
 
-    // --- 탭 전환 로직 ---
     function switchTab(tab) {
         if (tab === 'list') {
             document.getElementById('section-list').classList.remove('hidden');
@@ -126,21 +127,12 @@
         }
     }
 
-    // --- 영상 클릭 기록 저장 (PC 표시 추가) ---
     function recordClick(user, title, url) {
         const now = new Date();
         const timestamp = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
-        
-        db.ref('click_logs').push({
-            user: user,
-            title: title,
-            url: url,
-            time: timestamp,
-            device: "PC" // PC라고 명시
-        });
+        db.ref('click_logs').push({ user, title, url, time: timestamp, device: "PC" });
     }
 
-    // --- 히스토리 불러오기 (기기 표시 및 삭제 기능 추가) ---
     function loadClickHistory() {
         db.ref('click_logs').limitToLast(100).once('value', (snap) => {
             const tbody = document.getElementById('history-table-body');
@@ -150,17 +142,13 @@
                 tbody.innerHTML = '<tr><td colspan="6" style="padding:30px; color:#94a3b8;">기록이 없습니다.</td></tr>';
                 return;
             }
-
-            // 최신순 정렬
             Object.keys(logs).reverse().forEach(key => {
                 const log = logs[key];
-                const device = log.device || 'Unknown'; // 기존 데이터 호환
-                
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td style="color:#64748b; font-size:0.85rem;">${log.time}</td>
                     <td><span class="user-badge">${log.user}</span></td>
-                    <td><span class="device-badge">${device}</span></td>
+                    <td><span class="device-badge">${log.device || 'PC'}</span></td>
                     <td style="text-align:left; font-weight:600;">${log.title}</td>
                     <td><a href="${log.url}" target="_blank" style="color:#3b82f6; font-size:0.8rem;">이동</a></td>
                     <td><button onclick="deleteHistory('${key}')" class="btn-mini btn-del">삭제</button></td>
@@ -170,17 +158,12 @@
         });
     }
 
-    // --- 히스토리 삭제 함수 ---
     function deleteHistory(key) {
         if(confirm("이 기록을 삭제하시겠습니까?")) {
-            db.ref('click_logs/' + key).remove()
-            .then(() => {
-                loadClickHistory(); // 목록 새로고침
-            });
+            db.ref('click_logs/' + key).remove().then(() => loadClickHistory());
         }
     }
 
-    // 1. 데이터 실시간 감시 (기존 코드)
     db.ref('class_links').on('value', (snap) => {
         allDataCache = snap.val();
         renderLinks(allDataCache);
@@ -206,6 +189,7 @@
                     <td><span class="user-badge">${link.user}</span></td>
                     <td><input type="date" class="edit-input ed-date" value="${link.date}"></td>
                     <td><input type="text" class="edit-input ed-title" value="${link.title}"></td>
+                    <td><span class="duration-text">${link.duration || '-'}</span></td>
                     <td><input type="text" class="edit-input ed-url" value="${link.url}"></td>
                     <td colspan="2" style="color:#d97706; font-weight:bold;">수정 중...</td>
                     <td><button onclick="saveEdit('${link.id}')" class="btn-mini" style="background:#f59e0b; color:white;">저장</button></td>
@@ -215,6 +199,7 @@
                     <td><span class="user-badge">${link.user}</span></td>
                     <td class="date-text">${link.date}</td>
                     <td style="text-align:left; font-weight:600;" class="title-text">${link.title}</td>
+                    <td class="duration-text">${link.duration || '-'}</td>
                     <td>
                         <a href="${link.url}" target="_blank" class="video-link" 
                            onclick="recordClick('${link.user}', '${link.title}', '${link.url}')">▶ 영상보기</a>
@@ -238,13 +223,8 @@
             title: tr.querySelector('.ed-title').value,
             url: tr.querySelector('.ed-url').value
         };
-
         db.ref('class_links/' + id).update(updateData).then(() => {
             editId = null;
-            return db.ref('class_links').once('value');
-        }).then((snap) => {
-            allDataCache = snap.val();
-            renderLinks(allDataCache);
         });
     }
 
