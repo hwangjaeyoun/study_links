@@ -65,7 +65,7 @@
         <a href="admin.html" class="reg-btn-mob">+ 새 수업 등록하기</a>
         <select id="user-filter" onchange="renderLinks(allDataCache)">
             <option value="전체">전체</option>
-            <option value="영어">수학</option>
+            <option value="영어">영어</option>
             <option value="수학">수학</option>
         </select>
     </div>
@@ -207,4 +207,5 @@
     function deleteLink(id) { if(confirm("삭제하시겠습니까?")) db.ref('class_links/' + id).remove(); }
 </script>
 </body>
+
 </html>
