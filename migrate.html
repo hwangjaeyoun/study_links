@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>데이터 전환 도구</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+</head>
+<body>
+    <div style="padding: 50px; text-align: center;">
+        <button id="run" style="padding: 20px; font-size: 20px;">기존 데이터 (영어/수학)로 변경 시작</button>
+        <p id="msg"></p>
+    </div>
+    <script>
+        var firebaseConfig = {
+            apiKey: "AIzaSyAHvOrb4B3c1uY7WwaR1yuQrwP5lDbRZiI",
+            authDomain: "linkmanage-d8efd.firebaseapp.com",
+            databaseURL: "https://linkmanage-d8efd-default-rtdb.firebaseio.com",
+            projectId: "linkmanage-d8efd",
+            storageBucket: "linkmanage-d8efd.firebasestorage.app",
+            messagingSenderId: "517672204798",
+            appId: "1:517672204798:web:ec8315e84a5120648868af"
+        };
+        firebase.initializeApp(firebaseConfig);
+        var db = firebase.database();
+
+        document.getElementById('run').onclick = function() {
+            db.ref('class_links').once('value', function(snap) {
+                var data = snap.val();
+                if(!data) return alert("데이터가 없습니다.");
+                
+                var count = 0;
+                Object.keys(data).forEach(function(key) {
+                    var oldUser = data[key].user;
+                    var newUser = "";
+                    if(oldUser === "황다연") newUser = "영어";
+                    else if(oldUser === "김보석") newUser = "수학";
+                    
+                    if(newUser) {
+                        db.ref('class_links/' + key).update({ user: newUser });
+                        count++;
+                    }
+                });
+                document.getElementById('msg').innerText = count + "건 변경 완료!";
+            });
+        };
+    </script>
+</body>
+</html>

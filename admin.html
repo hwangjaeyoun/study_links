@@ -120,27 +120,6 @@ let fetchedDuration = ""; // 재생시간을 별도로 담을 변수
         });
     }
 
-function migrateData() {
-    db.ref('class_links').once('value', function(snapshot) {
-        var data = snapshot.val();
-        if (!data) return;
-
-        Object.keys(data).forEach(function(key) {
-            var currentName = data[key].user;
-            var newName = "";
-
-            if (currentName === "황다연") newName = "영어";
-            else if (currentName === "김보석") newName = "수학";
-
-            if (newName !== "") {
-                db.ref('class_links/' + key).update({ user: newName })
-                    .then(function() { console.log(key + " 변경 완료"); });
-            }
-        });
-        alert("데이터 변경이 완료되었습니다.");
-    });
-}
-
 </script>
 
 </body>
