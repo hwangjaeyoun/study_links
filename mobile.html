@@ -64,9 +64,9 @@
     <div class="header">
         <a href="admin.html" class="reg-btn-mob">+ 새 수업 등록하기</a>
         <select id="user-filter" onchange="renderLinks(allDataCache)">
-            <option value="전체">모든 친구들 보기</option>
-            <option value="황다연">황다연</option>
-            <option value="김보석">김보석</option>
+            <option value="전체">전체</option>
+            <option value="영어">수학</option>
+            <option value="수학">수학</option>
         </select>
     </div>
     <div id="mobile-card-container"></div>
@@ -146,6 +146,11 @@
 
     db.ref('class_links').on('value', (snap) => {
         allDataCache = snap.val();
+// 처음 로드될 때만 '영어'로 필터링 설정 (초기값이 '전체'라면)
+    var filterDropdown = document.getElementById('user-filter');
+    if (filterDropdown.value === "전체") { // 혹은 초기 설정값
+        filterDropdown.value = "영어";
+    }
         renderLinks(allDataCache);
     });
 
